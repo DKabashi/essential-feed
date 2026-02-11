@@ -8,32 +8,44 @@
 import XCTest
 @testable import EssentialFeed
 
-class RemoteFeedLoader: FeedLoader {
-    let url: URL
-    
-    init(url: URL) {
-        self.url = url
-    }
-    
-    func loadFeed(completion: @escaping (LoadFeedResult) -> Void) {
-        
-    }
-}
+
 
 final class EssentialFeedTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
     func test_init_urlIsNotNil() {
-        let sut = RemoteFeedLoader(url: URL(string: "https://google.com")!)
+        let (_, client) = prepareSUT()
         
-        XCTAssertNotNil(sut.url)
+        XCTAssertTrue(client.urls.isEmpty)
+    }
+    
+    func test_loadFeed_assignsUrlToClient() {
+        let (sut, client) = prepareSUT()
+        
+        sut.loadFeed { _ in }
+        
+        XCTAssertFalse(client.urls.isEmpty)
+    }
+    
+    func test_loadFeed_calledTwiceAssignsSameNumberOfUrlsToClient() {
+        let (sut, client) = prepareSUT()
+        
+        sut.loadFeed { _ in }
+        sut.loadFeed { _ in }
+        
+        XCTAssertEqual(client.urls.count, 2)
+    }
+    
+    private func prepareSUT(url: URL = URL(string: "https://google.com")!) -> (sut: FeedLoader, client: NetworkClientSpy) {
+        let client = NetworkClientSpy()
+        let sut = RemoteFeedLoader(url: url, client: client)
+        return (sut: sut, client: client)
+    }
+    
+    private class NetworkClientSpy: NetworkClient {
+        var urls: [URL] = []
+        func get(url: URL) {
+            self.urls.append(url)
+        }
     }
 
 }
