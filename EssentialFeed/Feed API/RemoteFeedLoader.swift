@@ -8,20 +8,20 @@
 import Foundation
 
 
-protocol NetworkClient {
+public protocol NetworkClient {
     func get(url: URL)
 }
 
-class RemoteFeedLoader: FeedLoader {
-    let url: URL
-    let client: NetworkClient
+public final class RemoteFeedLoader: FeedLoader {
+    private let url: URL
+    private let client: NetworkClient
     
-    init(url: URL, client: NetworkClient) {
+    public init(url: URL, client: NetworkClient) {
         self.url = url
         self.client = client
     }
     
-    func loadFeed(completion: @escaping (LoadFeedResult) -> Void) {
+    public func loadFeed(completion: @escaping (LoadFeedResult) -> Void) {
         client.get(url: url)
     }
 }
