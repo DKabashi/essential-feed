@@ -33,6 +33,49 @@ final class EssentialFeedTests: XCTestCase {
         XCTAssertEqual(client.urls.count, 2)
     }
     
+    func test_loadFeed_returnsErrorOnClientError() {
+        let (sut, client) = prepareSUT()
+        
+        var capturedErrors: [RemoteFeedLoader.Error?] = []
+        sut.loadFeed { result in
+            switch result {
+            case .failure(let error):
+                capturedErrors.append(error as? RemoteFeedLoader.Error)
+            default: return
+            }
+        }
+        client.completions.first!(.failure(RemoteFeedLoader.Error.connectivity))
+        
+        
+        XCTAssertEqual(capturedErrors, [.connectivity])
+    }
+    
+    func test_loadFeed_returnsErrorOnClientStatusCodeNon200() {
+        let (sut, client) = prepareSUT()
+        
+    
+        let statusCodesToTest = [203, 401, 404, 500, 501]
+        
+        statusCodesToTest.enumerated().forEach { index, statusCode in
+            var capturedErrors: [RemoteFeedLoader.Error?] = []
+            sut.loadFeed { result in
+                switch result {
+                case .failure(let error):
+                    capturedErrors.append(error as? RemoteFeedLoader.Error)
+                default: return
+                }
+            }
+            
+            let urlResponse = HTTPURLResponse(url: client.urls.first!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
+            
+            client.completions[index](.success(urlResponse))
+            
+            XCTAssertEqual(capturedErrors, [.invalidData])
+        }
+    }
+    
+    // TODO: See why we need to refactor above
+    
     private func prepareSUT(url: URL = URL(string: "https://google.com")!) -> (sut: FeedLoader, client: NetworkClientSpy) {
         let client = NetworkClientSpy()
         let sut = RemoteFeedLoader(url: url, client: client)
@@ -40,9 +83,12 @@ final class EssentialFeedTests: XCTestCase {
     }
     
     private class NetworkClientSpy: NetworkClient {
-        var urls: [URL] = []
-        func get(url: URL) {
+        private(set) var urls: [URL] = []
+        private(set) var completions: [(RemoteFeedLoaderResult) -> Void] = []
+        
+        func get(url: URL, completion: @escaping (RemoteFeedLoaderResult) -> Void) {
             self.urls.append(url)
+            completions.append(completion)
         }
     }
 
