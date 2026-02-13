@@ -44,8 +44,8 @@ final class EssentialFeedTests: XCTestCase {
             default: return
             }
         }
-        client.completions.first!(.failure(RemoteFeedLoader.Error.connectivity))
         
+        client.completeWithConnectivityError()
         
         XCTAssertEqual(capturedErrors, [.connectivity])
     }
@@ -66,9 +66,7 @@ final class EssentialFeedTests: XCTestCase {
                 }
             }
             
-            let urlResponse = HTTPURLResponse(url: client.urls.first!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
-            let data = Data()
-            client.completions[index](.success((data, urlResponse)))
+            client.complete(with: statusCode, at: index)
             
             XCTAssertEqual(capturedErrors, [.invalidData])
         }
@@ -86,12 +84,17 @@ final class EssentialFeedTests: XCTestCase {
             }
         }
         
-        let urlResponse = HTTPURLResponse(url: client.urls.first!, statusCode: 200, httpVersion: nil, headerFields: nil)!
-        let data = Data()
-        client.completions[0](.success((data, urlResponse)))
+        client.complete(with: 200)
         
         XCTAssertEqual(capturedErrors, [.invalidData])
     }
+    
+//    func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
+//        let (sut, client) = prepareSUT()
+//        
+//        
+//        
+//    }
     
     // TODO: See why we need to refactor above
     
@@ -108,6 +111,15 @@ final class EssentialFeedTests: XCTestCase {
         func get(url: URL, completion: @escaping (RemoteFeedLoaderResult) -> Void) {
             self.urls.append(url)
             completions.append(completion)
+        }
+        
+        func complete(with statusCode: Int, at index: Int = 0, data: Data = Data()) {
+            let urlResponse = HTTPURLResponse(url: urls.first!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
+            completions[index](.success((data, urlResponse)))
+        }
+        
+        func completeWithConnectivityError() {
+            completions.first!(.failure(RemoteFeedLoader.Error.connectivity))
         }
     }
 
