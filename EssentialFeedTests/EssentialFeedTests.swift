@@ -89,12 +89,23 @@ final class EssentialFeedTests: XCTestCase {
         XCTAssertEqual(capturedErrors, [.invalidData])
     }
     
-//    func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
-//        let (sut, client) = prepareSUT()
-//        
-//        
-//        
-//    }
+    func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
+        let (sut, client) = prepareSUT()
+        
+        var items: [FeedItem]?
+        sut.loadFeed { result in
+            switch result {
+            case .success(let feedItems):
+                items = feedItems
+            default: return
+            }
+        }
+        
+        let jsonData: Data = "{\"items\": []}".data(using: .utf8)!
+        client.complete(with: 200, data: jsonData)
+        
+        XCTAssertEqual(items, [])
+    }
     
     // TODO: See why we need to refactor above
     

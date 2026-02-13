@@ -35,17 +35,21 @@ public final class RemoteFeedLoader: FeedLoader {
                     return
                 }
 
-                guard let items = try? JSONDecoder().decode([FeedItem].self, from: data) else {
+                guard let itemsResponse = try? JSONDecoder().decode(FeedItemResponse.self, from: data) else {
                     completion(.failure(Self.Error.invalidData))
                     return
                 }
                 
-                completion(.success([]))
+                completion(.success(itemsResponse.items))
                 
             case .failure(let error):
                 completion(.failure(error))
             }
         }
     }
+}
+
+public struct FeedItemResponse: Decodable {
+    let items: [FeedItem]
 }
 
