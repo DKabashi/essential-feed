@@ -12,7 +12,7 @@ public protocol NetworkClient {
     func get(url: URL, completion: @escaping (RemoteFeedLoaderResult) -> Void)
 }
 
-public typealias RemoteFeedLoaderResult = Result<HTTPURLResponse, RemoteFeedLoader.Error>
+public typealias RemoteFeedLoaderResult = Result<(Data, HTTPURLResponse), RemoteFeedLoader.Error>
 
 public final class RemoteFeedLoader: FeedLoader {
     private let url: URL
@@ -29,8 +29,19 @@ public final class RemoteFeedLoader: FeedLoader {
     public func loadFeed(completion: @escaping (LoadFeedResult) -> Void) {
         client.get(url: url) { response in
             switch response {
-            case .success(let urlResponse):
-                completion(.failure(Self.Error.invalidData))
+            case .success(let data, let urlResponse):
+                guard urlResponse.statusCode == 200 else {
+                    completion(.failure(Self.Error.invalidData))
+                    return
+                }
+
+                guard let items = try? JSONDecoder().decode([FeedItem].self, from: data) else {
+                    completion(.failure(Self.Error.invalidData))
+                    return
+                }
+                
+                completion(.success([]))
+                
             case .failure(let error):
                 completion(.failure(error))
             }

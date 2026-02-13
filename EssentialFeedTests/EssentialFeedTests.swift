@@ -67,11 +67,30 @@ final class EssentialFeedTests: XCTestCase {
             }
             
             let urlResponse = HTTPURLResponse(url: client.urls.first!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
-            
-            client.completions[index](.success(urlResponse))
+            let data = Data()
+            client.completions[index](.success((data, urlResponse)))
             
             XCTAssertEqual(capturedErrors, [.invalidData])
         }
+    }
+    
+    func test_loadFeed_returnsErrorOn200ResponseAndInvalidJSON() {
+        let (sut, client) = prepareSUT()
+        
+        var capturedErrors: [RemoteFeedLoader.Error?] = []
+        sut.loadFeed { result in
+            switch result {
+            case .failure(let error):
+                capturedErrors.append(error as? RemoteFeedLoader.Error)
+            default: return
+            }
+        }
+        
+        let urlResponse = HTTPURLResponse(url: client.urls.first!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        let data = Data()
+        client.completions[0](.success((data, urlResponse)))
+        
+        XCTAssertEqual(capturedErrors, [.invalidData])
     }
     
     // TODO: See why we need to refactor above
