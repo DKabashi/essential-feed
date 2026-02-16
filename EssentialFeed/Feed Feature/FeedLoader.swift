@@ -7,9 +7,14 @@
 
 import Foundation
 
-public enum LoadFeedResult {
+public enum LoadFeedResult: Equatable {
     case success([FeedItem])
-    case failure(Error)
+    case failure(LoadFeedResultError)
+}
+
+// TODO: PotentialREfactor here, as api and database may use different errors
+public enum LoadFeedResultError: Error, Equatable {
+    case connectivity, invalidData
 }
 
 public protocol FeedLoader {

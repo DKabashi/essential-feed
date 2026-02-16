@@ -36,7 +36,7 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOnClientError() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: LoadFeedResult = .failure(RemoteFeedLoader.Error.connectivity)
+        let expectedResult: LoadFeedResult = .failure(.connectivity)
         expect(sut, toCompleteWithResult: expectedResult, when: {
             client.completeWithConnectivityError()
         })
@@ -49,7 +49,7 @@ final class EssentialFeedTests: XCTestCase {
         let statusCodesToTest = [203, 401, 404, 500, 501]
         
         statusCodesToTest.enumerated().forEach { index, statusCode in
-            let expectedResult: LoadFeedResult = .failure(RemoteFeedLoader.Error.invalidData)
+            let expectedResult: LoadFeedResult = .failure(.invalidData)
             expect(sut, toCompleteWithResult: expectedResult, when: {
                 client.complete(with: statusCode, at: index)
             })
@@ -59,7 +59,7 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOn200ResponseAndInvalidJSON() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: LoadFeedResult = .failure(RemoteFeedLoader.Error.invalidData)
+        let expectedResult: LoadFeedResult = .failure(.invalidData)
         expect(sut, toCompleteWithResult: expectedResult, when: {
             client.complete(with: 200)
         })
@@ -95,28 +95,14 @@ final class EssentialFeedTests: XCTestCase {
         line: UInt = #line
     ) {
         
-        var capturedErrors: [RemoteFeedLoader.Error?] = []
-        var capturedItems: [FeedItem]?
+        var capturedResult: [LoadFeedResult] = []
         sut.loadFeed { result in
-            switch result {
-            case .success(let feedItems):
-                capturedItems = feedItems
-            case .failure(let error):
-                capturedErrors.append(error as? RemoteFeedLoader.Error)
-            default: return
-            }
+            capturedResult.append(result)
         }
         
         action()
         
-        switch result {
-        case .success(let items):
-            XCTAssertEqual(capturedItems, items, file: file, line: line)
-        case .failure(let error):
-            XCTAssertEqual(capturedErrors, [error as? RemoteFeedLoader.Error], file: file, line: line)
-        @unknown default: fatalError()
-        }
-       
+        XCTAssertEqual(capturedResult, [result])
     }
     
     
@@ -135,7 +121,7 @@ final class EssentialFeedTests: XCTestCase {
         }
         
         func completeWithConnectivityError() {
-            completions.first!(.failure(RemoteFeedLoader.Error.connectivity))
+            completions.first!(.failure(.connectivity))
         }
     }
 
