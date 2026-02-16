@@ -36,18 +36,9 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOnClientError() {
         let (sut, client) = prepareSUT()
         
-        var capturedErrors: [RemoteFeedLoader.Error?] = []
-        sut.loadFeed { result in
-            switch result {
-            case .failure(let error):
-                capturedErrors.append(error as? RemoteFeedLoader.Error)
-            default: return
-            }
-        }
-        
-        client.completeWithConnectivityError()
-        
-        XCTAssertEqual(capturedErrors, [.connectivity])
+        expect(sut, toCompleteWithError: .connectivity, when: {
+            client.completeWithConnectivityError()
+        })
     }
     
     func test_loadFeed_returnsErrorOnClientStatusCodeNon200() {
@@ -57,36 +48,18 @@ final class EssentialFeedTests: XCTestCase {
         let statusCodesToTest = [203, 401, 404, 500, 501]
         
         statusCodesToTest.enumerated().forEach { index, statusCode in
-            var capturedErrors: [RemoteFeedLoader.Error?] = []
-            sut.loadFeed { result in
-                switch result {
-                case .failure(let error):
-                    capturedErrors.append(error as? RemoteFeedLoader.Error)
-                default: return
-                }
-            }
-            
-            client.complete(with: statusCode, at: index)
-            
-            XCTAssertEqual(capturedErrors, [.invalidData])
+            expect(sut, toCompleteWithError: .invalidData, when: {
+                client.complete(with: statusCode, at: index)
+            })
         }
     }
     
     func test_loadFeed_returnsErrorOn200ResponseAndInvalidJSON() {
         let (sut, client) = prepareSUT()
         
-        var capturedErrors: [RemoteFeedLoader.Error?] = []
-        sut.loadFeed { result in
-            switch result {
-            case .failure(let error):
-                capturedErrors.append(error as? RemoteFeedLoader.Error)
-            default: return
-            }
-        }
-        
-        client.complete(with: 200)
-        
-        XCTAssertEqual(capturedErrors, [.invalidData])
+        expect(sut, toCompleteWithError: .invalidData, when: {
+            client.complete(with: 200)
+        })
     }
     
     func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
@@ -107,13 +80,40 @@ final class EssentialFeedTests: XCTestCase {
         XCTAssertEqual(items, [])
     }
     
-    // TODO: See why we need to refactor above
+    func test_loadFeed_returnsFeedItemsOn200ResponseWithValidJSON() {
+    
+        
+    }
+    
     
     private func prepareSUT(url: URL = URL(string: "https://google.com")!) -> (sut: FeedLoader, client: NetworkClientSpy) {
         let client = NetworkClientSpy()
         let sut = RemoteFeedLoader(url: url, client: client)
         return (sut: sut, client: client)
     }
+    
+    private func expect(
+        _ sut: FeedLoader,
+        toCompleteWithError error: RemoteFeedLoader.Error?,
+        when action: () -> Void,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        
+        var capturedErrors: [RemoteFeedLoader.Error?] = []
+        sut.loadFeed { result in
+            switch result {
+            case .failure(let error):
+                capturedErrors.append(error as? RemoteFeedLoader.Error)
+            default: return
+            }
+        }
+        
+        action()
+        
+        XCTAssertEqual(capturedErrors, [error], file: file, line: line)
+    }
+    
     
     private class NetworkClientSpy: NetworkClient {
         private(set) var urls: [URL] = []
