@@ -36,7 +36,8 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOnClientError() {
         let (sut, client) = prepareSUT()
         
-        expect(sut, toCompleteWithError: .connectivity, when: {
+        let expectedResult: LoadFeedResult = .failure(RemoteFeedLoader.Error.connectivity)
+        expect(sut, toCompleteWithResult: expectedResult, when: {
             client.completeWithConnectivityError()
         })
     }
@@ -48,7 +49,8 @@ final class EssentialFeedTests: XCTestCase {
         let statusCodesToTest = [203, 401, 404, 500, 501]
         
         statusCodesToTest.enumerated().forEach { index, statusCode in
-            expect(sut, toCompleteWithError: .invalidData, when: {
+            let expectedResult: LoadFeedResult = .failure(RemoteFeedLoader.Error.invalidData)
+            expect(sut, toCompleteWithResult: expectedResult, when: {
                 client.complete(with: statusCode, at: index)
             })
         }
@@ -57,31 +59,24 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOn200ResponseAndInvalidJSON() {
         let (sut, client) = prepareSUT()
         
-        expect(sut, toCompleteWithError: .invalidData, when: {
+        let expectedResult: LoadFeedResult = .failure(RemoteFeedLoader.Error.invalidData)
+        expect(sut, toCompleteWithResult: expectedResult, when: {
             client.complete(with: 200)
         })
     }
     
+    
     func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
         let (sut, client) = prepareSUT()
         
-        var items: [FeedItem]?
-        sut.loadFeed { result in
-            switch result {
-            case .success(let feedItems):
-                items = feedItems
-            default: return
-            }
-        }
-        
-        let jsonData: Data = "{\"items\": []}".data(using: .utf8)!
-        client.complete(with: 200, data: jsonData)
-        
-        XCTAssertEqual(items, [])
+        let expectedResult: LoadFeedResult = .success([])
+        expect(sut, toCompleteWithResult: expectedResult, when: {
+            let jsonData: Data = "{\"items\": []}".data(using: .utf8)!
+            client.complete(with: 200, data: jsonData)
+        })
     }
     
     func test_loadFeed_returnsFeedItemsOn200ResponseWithValidJSON() {
-    
         
     }
     
@@ -94,15 +89,18 @@ final class EssentialFeedTests: XCTestCase {
     
     private func expect(
         _ sut: FeedLoader,
-        toCompleteWithError error: RemoteFeedLoader.Error?,
+        toCompleteWithResult result: LoadFeedResult,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
         
         var capturedErrors: [RemoteFeedLoader.Error?] = []
+        var capturedItems: [FeedItem]?
         sut.loadFeed { result in
             switch result {
+            case .success(let feedItems):
+                capturedItems = feedItems
             case .failure(let error):
                 capturedErrors.append(error as? RemoteFeedLoader.Error)
             default: return
@@ -111,7 +109,14 @@ final class EssentialFeedTests: XCTestCase {
         
         action()
         
-        XCTAssertEqual(capturedErrors, [error], file: file, line: line)
+        switch result {
+        case .success(let items):
+            XCTAssertEqual(capturedItems, items, file: file, line: line)
+        case .failure(let error):
+            XCTAssertEqual(capturedErrors, [error as? RemoteFeedLoader.Error], file: file, line: line)
+        @unknown default: fatalError()
+        }
+       
     }
     
     
