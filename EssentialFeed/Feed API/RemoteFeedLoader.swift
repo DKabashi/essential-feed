@@ -26,7 +26,7 @@ public final class RemoteFeedLoader: FeedLoader {
     public func loadFeed(completion: @escaping (LoadFeedResult) -> Void) {
         client.get(url: url) { response in
             switch response {
-            case .success(let data, let urlResponse):
+            case .success((let data, let urlResponse)):
                 guard urlResponse.statusCode == 200 else {
                     completion(.failure(.invalidData))
                     return
@@ -46,7 +46,11 @@ public final class RemoteFeedLoader: FeedLoader {
     }
 }
 
-public struct FeedItemResponse: Decodable {
+public struct FeedItemResponse: Codable {
     let items: [FeedItem]
+    
+    public init(items: [FeedItem]) {
+        self.items = items
+    }
 }
 

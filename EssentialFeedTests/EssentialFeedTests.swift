@@ -71,13 +71,23 @@ final class EssentialFeedTests: XCTestCase {
         
         let expectedResult: LoadFeedResult = .success([])
         expect(sut, toCompleteWithResult: expectedResult, when: {
-            let jsonData: Data = "{\"items\": []}".data(using: .utf8)!
-            client.complete(with: 200, data: jsonData)
+            let emptyListData: Data = Data("{\"items\": []}".utf8)
+            client.complete(with: 200, data: emptyListData)
         })
     }
     
     func test_loadFeed_returnsFeedItemsOn200ResponseWithValidJSON() {
+        let (sut, client) = prepareSUT()
         
+        let feedItem1 = FeedItem(id: UUID(), description: "Test", location: "Portugal", imageURL: URL(string: "https://google.com")!)
+        let feedItem2 = FeedItem(id: UUID(), imageURL: URL(string: "https://google.com")!)
+        let feedItem3 = FeedItem(id: UUID(), description: "test2", location: "Kosovo", imageURL: URL(string: "https://google.com")!)
+        
+        let items = [feedItem1, feedItem2, feedItem3]
+        expect(sut, toCompleteWithResult: .success(items), when: {
+            let itemsData: Data = try! JSONEncoder().encode(FeedItemResponse(items: items))
+            client.complete(with: 200, data: itemsData)
+        })
     }
     
     
@@ -102,7 +112,7 @@ final class EssentialFeedTests: XCTestCase {
         
         action()
         
-        XCTAssertEqual(capturedResult, [result])
+        XCTAssertEqual(capturedResult, [result], file: file, line: line)
     }
     
     
