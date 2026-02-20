@@ -79,12 +79,12 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsFeedItemsOn200ResponseWithValidJSON() {
         let (sut, client) = prepareSUT()
         
-        let feedItem1 = FeedItemAPIModel(id: UUID(), description: "Test", location: "Portugal", image: URL(string: "https://google.com")!)
-        let feedItem2 = FeedItemAPIModel(id: UUID(), image: URL(string: "https://google.com")!)
-        let feedItem3 = FeedItemAPIModel(id: UUID(), description: "test2", location: "Kosovo", image: URL(string: "https://google.com")!)
+        let feedItem1 = FeedItemsMapper.FeedItemAPIModel(id: UUID(), description: "Test", location: "Portugal", image: URL(string: "https://google.com")!)
+        let feedItem2 = FeedItemsMapper.FeedItemAPIModel(id: UUID(), image: URL(string: "https://google.com")!)
+        let feedItem3 = FeedItemsMapper.FeedItemAPIModel(id: UUID(), description: "test2", location: "Kosovo", image: URL(string: "https://google.com")!)
         let items = [feedItem1, feedItem2, feedItem3]
         expect(sut, toCompleteWithResult: .success(items.map { $0.item }), when: {
-            let itemsData: Data = try! JSONEncoder().encode(FeedItemResponse(items: items))
+            let itemsData: Data = try! JSONEncoder().encode(FeedItemsMapper.FeedItemResponse(items: items))
             client.complete(with: 200, data: itemsData)
         })
     }
