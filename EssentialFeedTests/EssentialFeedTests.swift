@@ -89,10 +89,18 @@ final class EssentialFeedTests: XCTestCase {
         })
     }
     
-    private func prepareSUT(url: URL = URL(string: "https://google.com")!) -> (sut: FeedLoader, client: NetworkClientSpy) {
+    private func prepareSUT(url: URL = URL(string: "https://google.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedLoader, client: NetworkClientSpy) {
         let client = NetworkClientSpy()
         let sut = RemoteFeedLoader(url: url, client: client)
+        checkForMemoryLeaks(for: sut, file: file, line: line)
+        checkForMemoryLeaks(for: client, file: file, line: line)
         return (sut: sut, client: client)
+    }
+    
+    private func checkForMemoryLeaks(for object: AnyObject, file: StaticString = #filePath, line: UInt = #line) {
+        addTeardownBlock { [weak object] in
+            XCTAssertNil(object, "Potential Memory Leak", file: file, line: line)
+        }
     }
     
     private func expect(

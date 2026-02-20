@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class FeedItemsMapper {
+final class FeedItemsMapper {
     static func map(_ data: Data, urlResponse: HTTPURLResponse) throws -> [FeedItem] {
         guard urlResponse.statusCode == 200 else {
             throw LoadFeedResultError.invalidData
