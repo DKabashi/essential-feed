@@ -79,17 +79,15 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsFeedItemsOn200ResponseWithValidJSON() {
         let (sut, client) = prepareSUT()
         
-        let feedItem1 = FeedItem(id: UUID(), description: "Test", location: "Portugal", imageURL: URL(string: "https://google.com")!)
-        let feedItem2 = FeedItem(id: UUID(), imageURL: URL(string: "https://google.com")!)
-        let feedItem3 = FeedItem(id: UUID(), description: "test2", location: "Kosovo", imageURL: URL(string: "https://google.com")!)
-        
+        let feedItem1 = FeedItemAPIModel(id: UUID(), description: "Test", location: "Portugal", image: URL(string: "https://google.com")!)
+        let feedItem2 = FeedItemAPIModel(id: UUID(), image: URL(string: "https://google.com")!)
+        let feedItem3 = FeedItemAPIModel(id: UUID(), description: "test2", location: "Kosovo", image: URL(string: "https://google.com")!)
         let items = [feedItem1, feedItem2, feedItem3]
-        expect(sut, toCompleteWithResult: .success(items), when: {
+        expect(sut, toCompleteWithResult: .success(items.map { $0.item }), when: {
             let itemsData: Data = try! JSONEncoder().encode(FeedItemResponse(items: items))
             client.complete(with: 200, data: itemsData)
         })
     }
-    
     
     private func prepareSUT(url: URL = URL(string: "https://google.com")!) -> (sut: FeedLoader, client: NetworkClientSpy) {
         let client = NetworkClientSpy()

@@ -37,7 +37,7 @@ public final class RemoteFeedLoader: FeedLoader {
                     return
                 }
                 
-                completion(.success(itemsResponse.items))
+                completion(.success(itemsResponse.items.map { $0.item }))
                 
             case .failure(let error):
                 completion(.failure(error))
@@ -47,10 +47,28 @@ public final class RemoteFeedLoader: FeedLoader {
 }
 
 public struct FeedItemResponse: Codable {
-    let items: [FeedItem]
+    let items: [FeedItemAPIModel]
     
-    public init(items: [FeedItem]) {
+    public init(items: [FeedItemAPIModel]) {
         self.items = items
+    }
+}
+
+public struct FeedItemAPIModel: Codable {
+    let id: UUID
+    let description: String?
+    let location: String?
+    let image: URL
+    
+    public init(id: UUID, description: String? = nil, location: String? = nil, image: URL) {
+        self.id = id
+        self.description = description
+        self.location = location
+        self.image = image
+    }
+    
+    public var item: FeedItem {
+        return FeedItem(id: id, description: description, location: location, imageURL: image)
     }
 }
 
