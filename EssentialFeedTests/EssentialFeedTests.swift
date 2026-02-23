@@ -89,6 +89,22 @@ final class EssentialFeedTests: XCTestCase {
         })
     }
     
+    func test_loadFeed_doesNotDeliverResultWhenInstanceIsDeallocated() {
+        let url = URL(string: "https://google.com")!
+        let client = NetworkClientSpy()
+        var sut: RemoteFeedLoader? = RemoteFeedLoader(url: url, client: client)
+        
+        var capturedResult: [LoadFeedResult] = []
+        sut?.loadFeed { result in
+            capturedResult.append(result)
+        }
+        
+        sut = nil
+        client.complete(with: 200)
+        
+        XCTAssertTrue(capturedResult.isEmpty)
+    }
+    
     private func prepareSUT(url: URL = URL(string: "https://google.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedLoader, client: NetworkClientSpy) {
         let client = NetworkClientSpy()
         let sut = RemoteFeedLoader(url: url, client: client)
