@@ -16,7 +16,6 @@ final class FeedItemsMapper {
             return .failure(LoadFeedResultError.invalidData)
         }
         
-        let items = itemsResponse.items.map { $0.item }
-        return .success(items)
+        return .success(itemsResponse.feed)
     }
 }
