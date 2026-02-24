@@ -8,8 +8,8 @@
 import XCTest
 import EssentialFeed
 
-final class EssentialFeedTests: XCTestCase {
-
+final class RemoteFeedLoaderTests: XCTestCase {
+// TODO: 05:00
     func test_init_urlIsNotNil() {
         let (_, client) = prepareSUT()
         
