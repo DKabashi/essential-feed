@@ -36,7 +36,7 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOnClientError() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: LoadFeedResult = .failure(.connectivity)
+        let expectedResult: RemoteFeedLoader.Result = .failure(.connectivity)
         expect(sut, toCompleteWithResult: expectedResult, when: {
             client.completeWithConnectivityError()
         })
@@ -49,7 +49,7 @@ final class EssentialFeedTests: XCTestCase {
         let statusCodesToTest = [203, 401, 404, 500, 501]
         
         statusCodesToTest.enumerated().forEach { index, statusCode in
-            let expectedResult: LoadFeedResult = .failure(.invalidData)
+            let expectedResult: RemoteFeedLoader.Result = .failure(.invalidData)
             expect(sut, toCompleteWithResult: expectedResult, when: {
                 client.complete(with: statusCode, at: index)
             })
@@ -59,7 +59,7 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsErrorOn200ResponseAndInvalidJSON() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: LoadFeedResult = .failure(.invalidData)
+        let expectedResult: RemoteFeedLoader.Result = .failure(.invalidData)
         expect(sut, toCompleteWithResult: expectedResult, when: {
             client.complete(with: 200)
         })
@@ -69,7 +69,7 @@ final class EssentialFeedTests: XCTestCase {
     func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: LoadFeedResult = .success([])
+        let expectedResult: RemoteFeedLoader.Result = .success([])
         expect(sut, toCompleteWithResult: expectedResult, when: {
             let emptyListData: Data = Data("{\"items\": []}".utf8)
             client.complete(with: 200, data: emptyListData)
@@ -94,7 +94,7 @@ final class EssentialFeedTests: XCTestCase {
         let client = NetworkClientSpy()
         var sut: RemoteFeedLoader? = RemoteFeedLoader(url: url, client: client)
         
-        var capturedResult: [LoadFeedResult] = []
+        var capturedResult: [RemoteFeedLoader.Result] = []
         sut?.loadFeed { result in
             capturedResult.append(result)
         }
@@ -105,7 +105,7 @@ final class EssentialFeedTests: XCTestCase {
         XCTAssertTrue(capturedResult.isEmpty)
     }
     
-    private func prepareSUT(url: URL = URL(string: "https://google.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedLoader, client: NetworkClientSpy) {
+    private func prepareSUT(url: URL = URL(string: "https://google.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: RemoteFeedLoader, client: NetworkClientSpy) {
         let client = NetworkClientSpy()
         let sut = RemoteFeedLoader(url: url, client: client)
         checkForMemoryLeaks(for: sut, file: file, line: line)
@@ -120,14 +120,14 @@ final class EssentialFeedTests: XCTestCase {
     }
     
     private func expect(
-        _ sut: FeedLoader,
-        toCompleteWithResult result: LoadFeedResult,
+        _ sut: RemoteFeedLoader,
+        toCompleteWithResult result: RemoteFeedLoader.Result,
         when action: () -> Void,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
         
-        var capturedResult: [LoadFeedResult] = []
+        var capturedResult: [RemoteFeedLoader.Result] = []
         sut.loadFeed { result in
             capturedResult.append(result)
         }

@@ -7,16 +7,14 @@
 
 import Foundation
 
-public enum LoadFeedResult: Equatable {
+public enum LoadFeedResult<AppError: Error> {
     case success([FeedItem])
-    case failure(LoadFeedResultError)
+    case failure(AppError)
 }
 
-// TODO: PotentialREfactor here, as api and database may use different errors
-public enum LoadFeedResultError: Error, Equatable {
-    case connectivity, invalidData
-}
+extension LoadFeedResult: Equatable where AppError: Equatable { }
 
 public protocol FeedLoader {
-    func loadFeed(completion: @escaping (LoadFeedResult) -> Void)
+    associatedtype AppError: Error
+    func loadFeed(completion: @escaping (LoadFeedResult<AppError>) -> Void)
 }

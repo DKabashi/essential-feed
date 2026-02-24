@@ -7,4 +7,4 @@
 
 import Foundation
 
-public typealias RemoteFeedLoaderResult = Result<(Data, HTTPURLResponse), LoadFeedResultError>
+public typealias RemoteFeedLoaderResult = Result<(Data, HTTPURLResponse), RemoteFeedLoader.APIError>

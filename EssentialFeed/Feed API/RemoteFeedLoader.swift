@@ -11,12 +11,18 @@ public final class RemoteFeedLoader: FeedLoader {
     private let url: URL
     private let client: NetworkClient
     
+    public enum APIError: Error {
+        case connectivity, invalidData
+    }
+    
+    public typealias Result = LoadFeedResult<APIError>
+    
     public init(url: URL, client: NetworkClient) {
         self.url = url
         self.client = client
     }
     
-    public func loadFeed(completion: @escaping (LoadFeedResult) -> Void) {
+    public func loadFeed(completion: @escaping (Result) -> Void) {
         client.get(url: url) { [weak self] response in
             guard self != nil else { return }
             switch response {
