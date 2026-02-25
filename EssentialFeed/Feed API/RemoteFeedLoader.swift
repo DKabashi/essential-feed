@@ -11,11 +11,8 @@ public final class RemoteFeedLoader: FeedLoader {
     private let url: URL
     private let client: NetworkClient
     
-    public enum APIError: Error {
-        case connectivity, invalidData
-    }
-    
-    public typealias Result = LoadFeedResult<APIError>
+    // TODO: Check if you need this
+    public typealias Result = LoadFeedResult
     
     public init(url: URL, client: NetworkClient) {
         self.url = url

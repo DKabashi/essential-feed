@@ -13,7 +13,7 @@ final class FeedItemsMapper {
             urlResponse.statusCode == 200,
             let itemsResponse = try? JSONDecoder().decode(FeedItemResponse.self, from: data)
         else {
-            return .failure(.invalidData)
+            return .failure(APIError.invalidData)
         }
         
         return .success(itemsResponse.feed)

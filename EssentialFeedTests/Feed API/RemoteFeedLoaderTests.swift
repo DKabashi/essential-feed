@@ -9,7 +9,7 @@ import XCTest
 import EssentialFeed
 
 final class RemoteFeedLoaderTests: XCTestCase {
-// TODO: 05:00
+
     func test_init_urlIsNotNil() {
         let (_, client) = prepareSUT()
         
@@ -36,7 +36,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
     func test_loadFeed_returnsErrorOnClientError() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: RemoteFeedLoader.Result = .failure(.connectivity)
+        let expectedResult: RemoteFeedLoader.Result = .failure(APIError.connectivity)
         expect(sut, toCompleteWithResult: expectedResult, when: {
             client.completeWithConnectivityError()
         })
@@ -49,7 +49,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
         let statusCodesToTest = [203, 401, 404, 500, 501]
         
         statusCodesToTest.enumerated().forEach { index, statusCode in
-            let expectedResult: RemoteFeedLoader.Result = .failure(.invalidData)
+            let expectedResult: RemoteFeedLoader.Result = .failure(APIError.invalidData)
             expect(sut, toCompleteWithResult: expectedResult, when: {
                 client.complete(with: statusCode, at: index)
             })
@@ -59,7 +59,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
     func test_loadFeed_returnsErrorOn200ResponseAndInvalidJSON() {
         let (sut, client) = prepareSUT()
         
-        let expectedResult: RemoteFeedLoader.Result = .failure(.invalidData)
+        let expectedResult: RemoteFeedLoader.Result = .failure(APIError.invalidData)
         expect(sut, toCompleteWithResult: expectedResult, when: {
             client.complete(with: 200)
         })
@@ -131,7 +131,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
             switch (actualResult, expectedResult) {
             case (.success(let actualItems), .success(let expectedItems)):
                 XCTAssertEqual(actualItems, expectedItems)
-            case (.failure(let actualError), .failure(let expectedError)):
+            case (.failure(let actualError as APIError), .failure(let expectedError as APIError)):
                 XCTAssertEqual(actualError, expectedError)
             default:
                 XCTFail("Expected result \(expectedResult), but got \(actualResult) instead")
