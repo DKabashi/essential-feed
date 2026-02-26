@@ -9,12 +9,12 @@ import Foundation
 
 public final class RemoteFeedLoader: FeedLoader {
     private let url: URL
-    private let client: NetworkClient
+    private let client: HTTPClient
     
     // TODO: Check if you need this
     public typealias Result = LoadFeedResult
     
-    public init(url: URL, client: NetworkClient) {
+    public init(url: URL, client: HTTPClient) {
         self.url = url
         self.client = client
     }

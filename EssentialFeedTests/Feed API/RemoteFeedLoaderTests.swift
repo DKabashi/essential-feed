@@ -142,11 +142,11 @@ final class RemoteFeedLoaderTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
     }
     
-    private class NetworkClientSpy: NetworkClient {
+    private class NetworkClientSpy: HTTPClient {
         private(set) var urls: [URL] = []
-        private(set) var completions: [(NetworkClientResult) -> Void] = []
+        private(set) var completions: [(HTTPClientResult) -> Void] = []
         
-        func get(url: URL, completion: @escaping (NetworkClientResult) -> Void) {
+        func get(url: URL, completion: @escaping (HTTPClientResult) -> Void) {
             self.urls.append(url)
             completions.append(completion)
         }
