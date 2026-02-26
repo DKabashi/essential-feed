@@ -7,6 +7,8 @@
 
 import Foundation
 
+public typealias NetworkClientResult = Result<(Data, HTTPURLResponse), APIError>
+
 public protocol NetworkClient {
-    func get(url: URL, completion: @escaping (RemoteFeedLoaderResult) -> Void)
+    func get(url: URL, completion: @escaping (NetworkClientResult) -> Void)
 }
