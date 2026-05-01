@@ -157,7 +157,7 @@ final class RemoteFeedLoaderTests: XCTestCase {
         }
         
         func completeWithConnectivityError() {
-            completions.first!(.failure(.connectivity))
+            completions.first!(.failure(APIError.connectivity))
         }
     }
 
