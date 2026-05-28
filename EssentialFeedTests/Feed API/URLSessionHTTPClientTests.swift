@@ -68,8 +68,10 @@ final class URLSessionHTTPClientTests: XCTestCase {
         wait(for: [expectation], timeout: 1)
     }
     
-    private func createSUT() -> URLSessionHTTPClient {
-        return URLSessionHTTPClient()
+    private func createSUT(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
+        let sut = URLSessionHTTPClient()
+        checkForMemoryLeaks(for: sut, file: file, line: line)
+        return sut
     }
     
     private class URLProtocolStub: URLProtocol {
