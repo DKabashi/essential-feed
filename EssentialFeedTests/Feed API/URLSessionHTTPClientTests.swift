@@ -1,33 +1,6 @@
 import EssentialFeed
 import XCTest
 
-class URLSessionHTTPClient {
-    private let session: URLSession
-    
-    init(session: URLSession = .shared) {
-        self.session = session
-    }
-    
-    struct UnexpectedError: Error {}
-    
-    func get(from url: URL, completion: @escaping (HTTPClientResult) -> Void) {
-        session.dataTask(with: URLRequest(url: url)) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let data = data, let response = response as? HTTPURLResponse {
-                completion(.success((data, response)))
-            } else {
-                completion(.failure(UnexpectedError()))
-            }
-        }.resume()
-    }
-}
-
-// end-to-end testing ❌
-// subclass based testing
-// protocol based testing
-// URLProtocol stubbing
-
 final class URLSessionHTTPClientTests: XCTestCase {
     
     override class func setUp() {
@@ -139,7 +112,7 @@ final class URLSessionHTTPClientTests: XCTestCase {
         return receivedResult
     }
     
-    private func createSUT(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
+    private func createSUT(file: StaticString = #filePath, line: UInt = #line) -> HTTPClient {
         let sut = URLSessionHTTPClient()
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return sut
