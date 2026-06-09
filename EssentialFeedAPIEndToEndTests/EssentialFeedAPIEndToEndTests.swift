@@ -3,26 +3,11 @@ import XCTest
 
 final class EssentialFeedAPIEndToEndTests: XCTestCase {
 
-    func test_endToEndServerGetFeedAPI_returnsExpectedTestData() {
-        let serverURL = URL(
-            string:
-                "https://essentialdeveloper.com/feed-case-study/test-api/feed"
-        )!
-        let client = URLSessionHTTPClient()
-        let feedLoader = RemoteFeedLoader(url: serverURL, client: client)
-
-        let expectation = XCTestExpectation(
-            description: "Expect the remote feed loader to load items"
-        )
-        var capturedResult: LoadFeedResult?
+    func test_endToEndServerGetFeedResult_returnsExpectedTestItemsData() {
+        let feedLoader = getFeedLoader()
         
-        feedLoader.loadFeed { result in
-            capturedResult = result
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 5.0)
-        
+        let capturedResult = getFeedResult(with: feedLoader)
+      
         switch capturedResult {
         case .success(let items):
             XCTAssertEqual(
@@ -44,8 +29,41 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
             XCTFail("Expected success, but got nothing instead")
         }
     }
-
+    
     // MARK: - Helpers
+    
+    private func getFeedLoader() -> FeedLoader {
+        let client = URLSessionHTTPClient()
+        let feedLoader = RemoteFeedLoader(url: serverURL(), client: client)
+        
+        // TODO: Check for memory leaks
+        
+        return feedLoader
+    }
+    
+    private func getFeedResult(with feedLoader: FeedLoader) -> LoadFeedResult? {
+        let expectation = XCTestExpectation(
+            description: "Expect the remote feed loader to load items"
+        )
+        var capturedResult: LoadFeedResult?
+        
+        feedLoader.loadFeed { result in
+            capturedResult = result
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 5.0)
+        
+        return capturedResult
+    }
+    
+    private func serverURL() -> URL {
+        return URL(
+            string:
+                "https://essentialdeveloper.com/feed-case-study/test-api/feed"
+        )!
+    }
+
 
     private func expectedItem(at index: Int) -> FeedItem {
         return FeedItem(
