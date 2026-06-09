@@ -32,11 +32,12 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
     
     // MARK: - Helpers
     
-    private func getFeedLoader() -> FeedLoader {
+    private func getFeedLoader(file: StaticString = #filePath, line: UInt = #line) -> FeedLoader {
         let client = URLSessionHTTPClient()
         let feedLoader = RemoteFeedLoader(url: serverURL(), client: client)
         
-        // TODO: Check for memory leaks
+        checkForMemoryLeaks(for: client, file: file, line: line)
+        checkForMemoryLeaks(for: feedLoader, file: file, line: line)
         
         return feedLoader
     }
