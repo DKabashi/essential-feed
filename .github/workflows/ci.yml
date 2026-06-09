@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+            
+jobs:
+  isolated-tests:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run isolated tests
+        run: xcodebuild clean build test -project EssentialFeed.xcodeproj -scheme "CI" CODE_SIGN_IDENTITIY="" CODE_SIGNING_REQUIRED=NO
