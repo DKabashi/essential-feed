@@ -4,7 +4,9 @@
       "id" : "AD86FCC0-C55F-4349-8760-241A1FF510B4",
       "name" : "Test Scheme Action",
       "options" : {
-
+        "addressSanitizer" : {
+          "enabled" : false
+        }
       }
     }
   ],
@@ -14,7 +16,6 @@
   },
   "testTargets" : [
     {
-      "parallelizable" : true,
       "target" : {
         "containerPath" : "container:EssentialFeed.xcodeproj",
         "identifier" : "81B9E73D2F3B7742000F5E57",
