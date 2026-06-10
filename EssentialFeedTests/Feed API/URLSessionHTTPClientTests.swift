@@ -3,12 +3,12 @@ import XCTest
 
 final class URLSessionHTTPClientTests: XCTestCase {
     
-    override class func setUp() {
+    override func setUp() {
         super.setUp()
         URLProtocolStub.startInterceptingRequests()
     }
     
-    override class func tearDown() {
+    override func tearDown() {
         URLProtocolStub.stopInterceptingRequests()
         super.tearDown()
     }
@@ -22,9 +22,8 @@ final class URLSessionHTTPClientTests: XCTestCase {
             XCTAssertEqual(request.httpMethod, "GET")
             expectation.fulfill()
         }
-       
-        createSUT().get(from: url, completion: { _ in })
         
+        createSUT().get(from: url, completion: { _ in })
         wait(for: [expectation], timeout: 1.0)
     }
     
@@ -171,11 +170,16 @@ final class URLSessionHTTPClientTests: XCTestCase {
         }
         
         override class func canInit(with request: URLRequest) -> Bool {
-            requestObserver?(request)
             return true
         }
         
         override func startLoading() {
+            if let observer = URLProtocolStub.requestObserver {
+                client?.urlProtocolDidFinishLoading(self)
+                observer(request)
+                return
+            }
+            
             if let data = URLProtocolStub.stub?.data {
                 client?.urlProtocol(self, didLoad: data)
             }
