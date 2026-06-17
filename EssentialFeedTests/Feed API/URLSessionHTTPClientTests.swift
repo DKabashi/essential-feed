@@ -110,14 +110,14 @@ final class URLSessionHTTPClientTests: XCTestCase {
         
         return receivedResult
     }
-    
+
+    // MARK: Factory methods
+
     private func createSUT(file: StaticString = #filePath, line: UInt = #line) -> HTTPClient {
         let sut = URLSessionHTTPClient()
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return sut
     }
-    
-    // MARK: Factory methods
     
     private func anyURL() -> URL {
         return URL(string: "http://any-url.com")!

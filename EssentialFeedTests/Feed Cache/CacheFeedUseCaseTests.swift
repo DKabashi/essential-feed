@@ -40,10 +40,11 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.deleteCachedFeedCount, 1)
     }
     
-    private func makeSut() -> (sut: LocalFeedLoader, store: FeedStore) {
+    private func makeSut(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
         let feedStore = FeedStore()
         let sut = LocalFeedLoader(store: feedStore)
-        
+        checkForMemoryLeaks(for: feedStore, file: file, line: line)
+        checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut: sut, store: feedStore)
     }
     
