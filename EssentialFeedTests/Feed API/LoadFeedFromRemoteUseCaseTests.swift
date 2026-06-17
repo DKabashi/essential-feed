@@ -1,14 +1,7 @@
-//
-//  EssentialFeedTests.swift
-//  EssentialFeedTests
-//
-//  Created by Donat Kabashi on 2/10/26.
-//
-
 import XCTest
 import EssentialFeed
 
-final class RemoteFeedLoaderTests: XCTestCase {
+final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
 
     func test_init_urlIsNotNil() {
         let (_, client) = prepareSUT()
@@ -64,7 +57,6 @@ final class RemoteFeedLoaderTests: XCTestCase {
             client.complete(with: 200)
         })
     }
-    
     
     func test_loadFeed_returnsEmtpyArrayOn200ResponseWithValidEmptyJson() {
         let (sut, client) = prepareSUT()
