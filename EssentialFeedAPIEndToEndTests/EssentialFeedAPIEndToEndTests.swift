@@ -33,7 +33,7 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
     // MARK: - Helpers
     
     private func getFeedLoader(file: StaticString = #filePath, line: UInt = #line) -> FeedLoader {
-        let client = URLSessionHTTPClient()
+        let client = URLSessionHTTPClient(session: URLSession(configuration: .ephemeral))
         let feedLoader = RemoteFeedLoader(url: serverURL(), client: client)
         
         checkForMemoryLeaks(for: client, file: file, line: line)
