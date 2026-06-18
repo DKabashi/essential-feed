@@ -143,7 +143,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         
         wait(for: [expectation], timeout: 1.0)
         
-        XCTAssertEqual(capturedError, expectedError)
+        XCTAssertEqual(capturedError, expectedError, file: file, line: line)
     }
     
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
