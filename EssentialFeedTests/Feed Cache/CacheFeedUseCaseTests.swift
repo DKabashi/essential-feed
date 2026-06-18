@@ -32,6 +32,10 @@ class FeedStore {
         insertionCompletion?(error)
     }
     
+    func completeCacheInsertionWithSuccess() {
+        insertionCompletion?(nil)
+    }
+    
     func insertItems(_ items: [FeedItem], timestamp: Date, completion: @escaping MessageCompletion) {
         receivedMessages.append(.insert(items: items, timestamp: timestamp))
         insertionCompletion = completion
@@ -141,6 +145,28 @@ final class CacheFeedUseCaseTests: XCTestCase {
         
         XCTAssertEqual(feedStore.receivedMessages, [.deleteCachedFeed, .insert(items: items, timestamp: timestamp)])
         XCTAssertEqual(capturedError, error)
+    }
+    
+    func test_save_succeedsWithNoErrorAfterCacheInsertion() {
+        let timestamp = Date()
+        let (sut, feedStore) = makeSut(timestamp: timestamp)
+        
+        let items = [uniqueFeedItem(), uniqueFeedItem()]
+        
+        let expectation = XCTestExpectation(description: "Expect save to fail with error on insertion error")
+        var capturedError: NSError?
+        sut.save(items: items) { error in
+            capturedError = error
+            expectation.fulfill()
+        }
+        
+        feedStore.completeCacheDeletionWithSuccess()
+        feedStore.completeCacheInsertionWithSuccess()
+        
+        wait(for: [expectation], timeout: 1.0)
+        
+        XCTAssertEqual(feedStore.receivedMessages, [.deleteCachedFeed, .insert(items: items, timestamp: timestamp)])
+        XCTAssertEqual(capturedError, nil)
     }
     
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
