@@ -6,11 +6,9 @@ class FeedStore {
     typealias DeletionCompletion = (NSError?) -> Void
     
     private(set) var deleteCachedFeedCount = 0
-    private(set) var insertFeedCacheCount = 0
+    private(set) var capturedItems = [FeedItem]()
     
     private var deletionCompletion: DeletionCompletion?
-    
-    private(set) var capturedItems = [FeedItem]()
     
     func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         deleteCachedFeedCount += 1
@@ -23,7 +21,6 @@ class FeedStore {
     
     func completeCacheDeletionWithSuccess() {
         deletionCompletion?(nil)
-        insertFeedCacheCount += 1
     }
     
     func insertItems(_ items: [FeedItem]) {
@@ -68,7 +65,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.deleteCachedFeedCount, 1)
     }
     
-    func test_save_failedDeletionDoesNotIncreaseFeedCacheCount() {
+    func test_save_failedDeletionDoesNotStoreItems() {
         let (sut, feedStore) = makeSut()
         
         let items = [uniqueFeedItem(), uniqueFeedItem()]
@@ -76,18 +73,8 @@ final class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items: items)
         feedStore.completeCacheDeletion(with: anyNSError())
         
-        XCTAssertEqual(feedStore.insertFeedCacheCount, 0)
-    }
-    
-    func test_save_successfulDeletionIncreasesFeedCacheCount() {
-        let (sut, feedStore) = makeSut()
-        
-        let items = [uniqueFeedItem(), uniqueFeedItem()]
-        
-        sut.save(items: items)
-        feedStore.completeCacheDeletionWithSuccess()
-        
-        XCTAssertEqual(feedStore.insertFeedCacheCount, 1)
+        XCTAssertEqual(feedStore.capturedItems, [])
+        XCTAssertEqual(feedStore.deleteCachedFeedCount, 1)
     }
     
     func test_save_storeItemsAfterSuccessfulDeletion() {
@@ -99,7 +86,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         
         feedStore.completeCacheDeletionWithSuccess()
         
-        XCTAssertEqual(feedStore.insertFeedCacheCount, 1)
+        XCTAssertEqual(feedStore.deleteCachedFeedCount, 1)
         XCTAssertEqual(feedStore.capturedItems, items)
     }
     
