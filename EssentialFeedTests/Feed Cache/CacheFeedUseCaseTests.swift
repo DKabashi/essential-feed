@@ -29,19 +29,21 @@ class FeedStore {
 }
 
 class LocalFeedLoader {
-    var feedStore: FeedStore
+    private var feedStore: FeedStore
+    private var createTimestamp: () -> Date
     
-    init(store: FeedStore) {
+    init(store: FeedStore, createTimestamp: @escaping () -> Date) {
         feedStore = store
+        self.createTimestamp = createTimestamp
     }
     
-    func save(items: [FeedItem], timestamp: Date = .now) {
+    func save(items: [FeedItem]) {
         feedStore.deleteCachedFeed { [weak self] error in
             // Why unowned here?
             guard let self = self else { return }
             
             if error == nil {
-                self.feedStore.insertItems(items, timestamp: timestamp)
+                self.feedStore.insertItems(items, timestamp: createTimestamp())
             }
         }
     }
@@ -77,12 +79,12 @@ final class CacheFeedUseCaseTests: XCTestCase {
     }
     
     func test_save_capturesItemsWithTimestampAfterSuccessfulDeletion() {
-        let (sut, feedStore) = makeSut()
+        let timestamp = Date()
+        let (sut, feedStore) = makeSut(timestamp: timestamp)
         
         let items = [uniqueFeedItem(), uniqueFeedItem()]
-        let timestamp = Date()
         
-        sut.save(items: items, timestamp: timestamp)
+        sut.save(items: items)
         
         feedStore.completeCacheDeletionWithSuccess()
         
@@ -90,9 +92,11 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.capturedTimestampWithItems[timestamp], items)
     }
     
-    private func makeSut(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
+    private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
         let feedStore = FeedStore()
-        let sut = LocalFeedLoader(store: feedStore)
+        let sut = LocalFeedLoader(store: feedStore, createTimestamp: {
+            return timestamp
+        })
         checkForMemoryLeaks(for: feedStore, file: file, line: line)
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut: sut, store: feedStore)
