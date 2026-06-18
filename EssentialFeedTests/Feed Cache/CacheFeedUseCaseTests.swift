@@ -6,7 +6,7 @@ class FeedStore {
     typealias DeletionCompletion = (NSError?) -> Void
     
     private(set) var deleteCachedFeedCount = 0
-    private(set) var capturedItems = [FeedItem]()
+    private(set) var capturedTimestampWithItems = [Date:[FeedItem]]()
     
     private var deletionCompletion: DeletionCompletion?
     
@@ -23,8 +23,8 @@ class FeedStore {
         deletionCompletion?(nil)
     }
     
-    func insertItems(_ items: [FeedItem]) {
-        capturedItems = items
+    func insertItems(_ items: [FeedItem], timestamp: Date) {
+        capturedTimestampWithItems[timestamp] = items
     }
 }
 
@@ -35,13 +35,13 @@ class LocalFeedLoader {
         feedStore = store
     }
     
-    func save(items: [FeedItem]) {
+    func save(items: [FeedItem], timestamp: Date = .now) {
         feedStore.deleteCachedFeed { [weak self] error in
             // Why unowned here?
             guard let self = self else { return }
             
             if error == nil {
-                self.feedStore.insertItems(items)
+                self.feedStore.insertItems(items, timestamp: timestamp)
             }
         }
     }
@@ -69,25 +69,25 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let (sut, feedStore) = makeSut()
         
         let items = [uniqueFeedItem(), uniqueFeedItem()]
-        
         sut.save(items: items)
         feedStore.completeCacheDeletion(with: anyNSError())
         
-        XCTAssertEqual(feedStore.capturedItems, [])
+        XCTAssertEqual(feedStore.capturedTimestampWithItems, [:])
         XCTAssertEqual(feedStore.deleteCachedFeedCount, 1)
     }
     
-    func test_save_storeItemsAfterSuccessfulDeletion() {
+    func test_save_capturesItemsWithTimestampAfterSuccessfulDeletion() {
         let (sut, feedStore) = makeSut()
         
         let items = [uniqueFeedItem(), uniqueFeedItem()]
+        let timestamp = Date()
         
-        sut.save(items: items)
+        sut.save(items: items, timestamp: timestamp)
         
         feedStore.completeCacheDeletionWithSuccess()
         
         XCTAssertEqual(feedStore.deleteCachedFeedCount, 1)
-        XCTAssertEqual(feedStore.capturedItems, items)
+        XCTAssertEqual(feedStore.capturedTimestampWithItems[timestamp], items)
     }
     
     private func makeSut(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
