@@ -51,12 +51,12 @@ class LocalFeedLoader {
         self.createTimestamp = createTimestamp
     }
     
-    func save(items: [FeedItem], didFailWithError: @escaping (NSError?) -> Void) {
+    func save(items: [FeedItem], completion: @escaping (NSError?) -> Void) {
         feedStore.deleteCachedFeed { [unowned self] deletionError in
             if let error = deletionError {
-                didFailWithError(error)
+                completion(error)
             } else {
-                self.feedStore.insertItems(items, timestamp: createTimestamp(), completion: didFailWithError)
+                self.feedStore.insertItems(items, timestamp: createTimestamp(), completion: completion)
             }
         }
     }
