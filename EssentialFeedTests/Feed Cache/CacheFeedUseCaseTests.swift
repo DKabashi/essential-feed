@@ -38,10 +38,7 @@ class LocalFeedLoader {
     }
     
     func save(items: [FeedItem]) {
-        feedStore.deleteCachedFeed { [weak self] error in
-            // Why unowned here?
-            guard let self = self else { return }
-            
+        feedStore.deleteCachedFeed { [unowned self] error in
             if error == nil {
                 self.feedStore.insertItems(items, timestamp: createTimestamp())
             }
