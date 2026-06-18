@@ -13,6 +13,10 @@ class FeedStore {
     func completeCacheDeletion(with error: NSError) {
         
     }
+    
+    func completeCacheDeletionWithSuccess() {
+        insertFeedCacheCount += 1
+    }
 }
 
 class LocalFeedLoader {
@@ -56,6 +60,16 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.insertFeedCacheCount, 0)
     }
     
+    func test_save_successfulDeletionIncreasesFeedCacheCount() {
+        let (sut, feedStore) = makeSut()
+        
+        let items = [uniqueFeedItem(), uniqueFeedItem()]
+        
+        sut.save(items: items)
+        feedStore.completeCacheDeletionWithSuccess()
+        
+        XCTAssertEqual(feedStore.insertFeedCacheCount, 1)
+    }
     
     private func makeSut(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
         let feedStore = FeedStore()
