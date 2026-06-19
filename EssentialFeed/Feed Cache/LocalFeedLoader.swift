@@ -23,10 +23,16 @@ public final class LocalFeedLoader {
     }
     
     private func cache(items: [FeedItem], completion: @escaping (SaveResult) -> Void) {
-        feedStore.insertItems(items, timestamp: createTimestamp(), completion: { [weak self] insertionError in
+        feedStore.insertItems(items.localFeedItems, timestamp: createTimestamp(), completion: { [weak self] insertionError in
             guard self != nil else { return }
             
             completion(insertionError)
         })
+    }
+}
+
+private extension Array where Element == FeedItem {
+    var localFeedItems: [LocalFeedItem] {
+        self.map { LocalFeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL) }
     }
 }

@@ -1,13 +1,6 @@
-//
-//  FeedItem.swift
-//  EssentialFeed
-//
-//  Created by Donat Kabashi on 2/10/26.
-//
-
 import Foundation
 
-public struct FeedItem: Equatable {
+public struct LocalFeedItem: Equatable {
     public let id: UUID
     public let description: String?
     public let location: String?
