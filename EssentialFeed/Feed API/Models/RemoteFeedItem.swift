@@ -7,20 +7,16 @@
 
 import Foundation
 
-public struct FeedItemAPIModel: Codable {
-    let id: UUID
-    let description: String?
-    let location: String?
-    let image: URL
+public struct RemoteFeedItem: Decodable {
+    public let id: UUID
+    public let description: String?
+    public let location: String?
+    public let image: URL
     
     public init(id: UUID, description: String? = nil, location: String? = nil, image: URL) {
         self.id = id
         self.description = description
         self.location = location
         self.image = image
-    }
-    
-    public var item: FeedItem {
-        return FeedItem(id: id, description: description, location: location, imageURL: image)
     }
 }

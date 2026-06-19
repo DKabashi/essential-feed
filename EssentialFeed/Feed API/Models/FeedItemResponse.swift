@@ -7,14 +7,10 @@
 
 import Foundation
 
-public struct FeedItemResponse: Codable {
-    let items: [FeedItemAPIModel]
+public struct FeedItemResponse: Decodable {
+    let items: [RemoteFeedItem]
     
-    public var feed: [FeedItem] {
-        items.map { $0.item }
-    }
-    
-    public init(items: [FeedItemAPIModel]) {
+    public init(items: [RemoteFeedItem]) {
         self.items = items
     }
 }

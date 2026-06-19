@@ -71,13 +71,13 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     func test_loadFeed_returnsFeedItemsOn200ResponseWithValidJSON() {
         let (sut, client) = prepareSUT()
         
-        let feedItem1 = FeedItemAPIModel(id: UUID(), description: "Test", location: "Portugal", image: URL(string: "https://google.com")!)
-        let feedItem2 = FeedItemAPIModel(id: UUID(), image: URL(string: "https://google.com")!)
-        let feedItem3 = FeedItemAPIModel(id: UUID(), description: "test2", location: "Kosovo", image: URL(string: "https://google.com")!)
+        let feedItem1 = RemoteFeedItem(id: UUID(), description: "Test", location: "Portugal", image: URL(string: "https://google.com")!)
+        let feedItem2 = RemoteFeedItem(id: UUID(), image: URL(string: "https://google.com")!)
+        let feedItem3 = RemoteFeedItem(id: UUID(), description: "test2", location: "Kosovo", image: URL(string: "https://google.com")!)
         let items = [feedItem1, feedItem2, feedItem3]
-        expect(sut, toCompleteWithResult: .success(items.map { $0.item }), when: {
-            let itemsData: Data = try! JSONEncoder().encode(FeedItemResponse(items: items))
-            client.complete(with: 200, data: itemsData)
+        let modelItems = items.map { FeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.image) }
+        expect(sut, toCompleteWithResult: .success(modelItems), when: {
+            client.complete(with: 200, data: makeItemsJSON(items))
         })
     }
     
@@ -103,6 +103,27 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         checkForMemoryLeaks(for: sut, file: file, line: line)
         checkForMemoryLeaks(for: client, file: file, line: line)
         return (sut: sut, client: client)
+    }
+    
+    private func makeItemsJSON(_ items: [RemoteFeedItem]) -> Data {
+        let json = ["items": items.map { item -> [String: Any] in
+            var jsonItem: [String: Any] = [
+                "id": item.id.uuidString,
+                "image": item.image.absoluteString
+            ]
+            
+            if let description = item.description {
+                jsonItem["description"] = description
+            }
+            
+            if let location = item.location {
+                jsonItem["location"] = location
+            }
+            
+            return jsonItem
+        }]
+        
+        return try! JSONSerialization.data(withJSONObject: json)
     }
     
     private func expect(
