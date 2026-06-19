@@ -11,7 +11,8 @@ class LocalFeedLoader {
     }
     
     func save(items: [FeedItem], completion: @escaping (NSError?) -> Void) {
-        feedStore.deleteCachedFeed { [unowned self] deletionError in
+        feedStore.deleteCachedFeed { [weak self] deletionError in
+            guard let self = self else { return }
             if let error = deletionError {
                 completion(error)
             } else {
@@ -95,6 +96,22 @@ final class CacheFeedUseCaseTests: XCTestCase {
             feedStore.completeCacheDeletionWithSuccess()
             feedStore.completeCacheInsertionWithSuccess()
         }
+    }
+    
+    func test_save_doesNotReturnDeletionErrorAfterSUTIsDeallocated() {
+        let store = FeedStoreSpy()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, createTimestamp: Date.init)
+        
+        var receivedErrors = [Error?]()
+        
+        sut?.save(items: [uniqueFeedItem()]) { error in
+            receivedErrors.append(error)
+        }
+        
+        sut = nil
+        store.completeCacheDeletion(with: anyNSError())
+        
+        XCTAssertTrue(receivedErrors.isEmpty)
     }
     
     func expect(_ sut: LocalFeedLoader, toCompleteWithError expectedError: NSError?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
