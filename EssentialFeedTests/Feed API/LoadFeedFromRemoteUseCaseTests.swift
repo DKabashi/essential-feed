@@ -75,7 +75,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let feedItem2 = RemoteFeedItem(id: UUID(), image: URL(string: "https://google.com")!)
         let feedItem3 = RemoteFeedItem(id: UUID(), description: "test2", location: "Kosovo", image: URL(string: "https://google.com")!)
         let items = [feedItem1, feedItem2, feedItem3]
-        let modelItems = items.map { FeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.image) }
+        let modelItems = items.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.image) }
         expect(sut, toCompleteWithResult: .success(modelItems), when: {
             client.complete(with: 200, data: makeItemsJSON(items))
         })
