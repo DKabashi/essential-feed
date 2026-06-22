@@ -23,10 +23,13 @@ public final class LocalFeedLoader {
     }
     
     public func load(completion: @escaping (SaveResult) -> Void) {
-        feedStore.retrieve { result in
+        feedStore.retrieve { [weak self] result in
+            guard let self else { return }
             switch result {
             case let .success((_, timestamp)):
-                if Date() > timestamp.addingTimeInterval(60 * 60 * 24 * 7) {
+                let cacheIsExpired = Date() > timestamp.addingTimeInterval(60 * 60 * 24 * 7)
+                if cacheIsExpired {
+                    feedStore.deleteCachedFeed { _ in }
                     completion(NSError(domain: "", code: 0))
                 } else {
                     completion(nil)

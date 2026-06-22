@@ -52,7 +52,6 @@ class FeedStoreSpy: FeedStore {
     }
     
     func completeRetrivalWithFeedData(timestamp: Date, localItems: [LocalFeedImage]) {
-        // TODO: Check if it is needed
         receivedItems.append((timestamp: timestamp, localItems: localItems))
         retrieveCompletion?(.success((localItems: localItems, timestamp: timestamp)))
     }
