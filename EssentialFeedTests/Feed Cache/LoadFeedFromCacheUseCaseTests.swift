@@ -52,7 +52,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_deliversNoErrorIfCacheIsLessThanSevenDaysOld() {
         let (sut, feedStore) = makeSut()
         
-        let validTimestamp = Date().addingTimeInterval(60 * 60 * 24 * 5)
+        let validTimestamp = Date().addingTimeInterval(60 * 60 * 24 * (sut.validExpireDays - 1))
         let localItems = [uniqueLocalFeedItem()]
         
         let exp = XCTestExpectation(description: "Wait for load to finish")
@@ -71,7 +71,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_requestsDataDeletionAndReturnsNoFeedImagesIfCacheExpired() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -8)
+        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -(sut.validExpireDays + 1))
         let localItems = [uniqueLocalFeedItem()]
         
         let exp = XCTestExpectation(description: "Wait for load to finish")
@@ -91,7 +91,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsErrorWhenRequestsDataDeletionFails() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -8)
+        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -(sut.validExpireDays + 1))
         let localItems = [uniqueLocalFeedItem()]
         
         let exp = XCTestExpectation(description: "Wait for load to finish")

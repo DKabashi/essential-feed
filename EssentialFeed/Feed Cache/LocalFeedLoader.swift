@@ -7,6 +7,8 @@ public final class LocalFeedLoader {
     public typealias SaveResult = NSError?
     public typealias LoadResult = Result<[FeedImage]?, NSError>
     
+    public let validExpireDays: TimeInterval = 7
+    
     public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
         feedStore = store
         self.createTimestamp = createTimestamp
@@ -28,23 +30,28 @@ public final class LocalFeedLoader {
             guard let self else { return }
             switch result {
             case let .success((_, timestamp)):
-                let cacheIsExpired = Date() > timestamp.addingTimeInterval(60 * 60 * 24 * 7)
-                if cacheIsExpired {
-                    // TODO: Refactor
-                    feedStore.deleteCachedFeed { deletionError in
-                        if let deletionError {
-                            completion(.failure(deletionError))
-                        } else {
-                            completion(.success(nil))
-                        }
-                    }
+                if isExpired(timestamp: timestamp) {
+                    deleteExpiredCache(completion: completion)
                 } else {
                     completion(.success(nil))
                 }
-                
             case .failure(let error): completion(.failure(error))
             }
         }
+    }
+    
+    private func deleteExpiredCache(completion: @escaping (LoadResult) -> Void) {
+        feedStore.deleteCachedFeed { deletionError in
+            if let deletionError {
+                completion(.failure(deletionError))
+            } else {
+                completion(.success(nil))
+            }
+        }
+    }
+    
+    private func isExpired(timestamp: Date) -> Bool {
+        return Date() > timestamp.addingTimeInterval(60 * 60 * 24 * validExpireDays)
     }
     
     private func cache(feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
