@@ -3,6 +3,7 @@ import Foundation
 public final class LocalFeedLoader {
     private var feedStore: FeedStore
     private var createTimestamp: () -> Date
+    private let calendar = Calendar(identifier: .gregorian)
     
     public typealias SaveResult = NSError?
     public typealias LoadResult = LoadFeedResult
@@ -51,7 +52,10 @@ public final class LocalFeedLoader {
     }
     
     private func isExpired(timestamp: Date) -> Bool {
-        return Date() > timestamp.addingTimeInterval(60 * 60 * 24 * TimeInterval(validExpireDays))
+        guard let expiredDate = calendar.date(byAdding: .day, value: validExpireDays, to: timestamp) else {
+            return true
+        }
+        return Date() > expiredDate
     }
     
     private func cache(feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
