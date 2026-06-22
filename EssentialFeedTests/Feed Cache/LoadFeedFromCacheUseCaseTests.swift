@@ -43,7 +43,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_deliversNoErrorIfCacheIsLessThanSevenDaysOld() {
         let (sut, feedStore) = makeSut()
         
-        let validTimestamp = Date().addingTimeInterval(60 * 60 * 24 * (sut.validExpireDays - 1))
+        let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
         let localItems = [uniqueLocalFeedItem()]
         
         expect(sut, toCompleteWithResult: .success(nil), when: {
@@ -54,7 +54,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_requestsDataDeletionAndReturnsNoFeedImagesIfCacheExpired() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -(sut.validExpireDays + 1))
+        let expiredTimestamp = getTimestamp(isValid: false, validExpireDays: sut.validExpireDays)
         let localItems = [uniqueLocalFeedItem()]
         
         expect(sut, toCompleteWithResult: .success(nil), when: {
@@ -68,7 +68,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsErrorWhenRequestsDataDeletionFails() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -(sut.validExpireDays + 1))
+        let expiredTimestamp = getTimestamp(isValid: false, validExpireDays: sut.validExpireDays)
         let localItems = [uniqueLocalFeedItem()]
         let expectedError = anyNSError()
         
@@ -81,10 +81,10 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsNoFeedImagesWhenEmptyCacheData() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * (sut.validExpireDays - 1))
+        let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
         
         expect(sut, toCompleteWithResult: .success(nil), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: [])
+            feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])
         })
     }
     
@@ -112,6 +112,11 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         checkForMemoryLeaks(for: feedStore, file: file, line: line)
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut: sut, store: feedStore)
+    }
+    
+    private func getTimestamp(isValid: Bool, validExpireDays: TimeInterval) -> Date {
+        let days = isValid ? (validExpireDays - 1) : -(validExpireDays + 1)
+        return Date().addingTimeInterval(60 * 60 * 24 * days)
     }
     
     private func anyNSError() -> NSError {
