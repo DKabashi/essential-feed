@@ -2,8 +2,8 @@ import Foundation
 import EssentialFeed
 
 class FeedStoreSpy: FeedStore {
-    private var deletionCompletion: ActionCompletion?
-    private var insertionCompletion: ActionCompletion?
+    private var deletionCompletion: DeleteCompletion?
+    private var insertionCompletion: InsertionCompletion?
     private var retrieveCompletion: RetriveCompletion?
     
     private(set) var receivedMessages = [FeedStoreAction]()
@@ -16,7 +16,7 @@ class FeedStoreSpy: FeedStore {
     
     private(set) var receivedItems = [(timestamp: Date, localItems: [LocalFeedImage])]()
         
-    func deleteCachedFeed(completion: @escaping ActionCompletion) {
+    func deleteCachedFeed(completion: @escaping DeleteCompletion) {
         receivedMessages.append(.deleteCachedFeed)
         deletionCompletion = completion
     }
@@ -37,7 +37,7 @@ class FeedStoreSpy: FeedStore {
         insertionCompletion?(nil)
     }
     
-    func insert(_ items: [LocalFeedImage], timestamp: Date, completion: @escaping ActionCompletion) {
+    func insert(_ items: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
         receivedMessages.append(.insert(items: items, timestamp: timestamp))
         insertionCompletion = completion
     }
