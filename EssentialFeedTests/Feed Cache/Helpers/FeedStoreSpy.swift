@@ -4,6 +4,7 @@ import EssentialFeed
 class FeedStoreSpy: FeedStore {
     private var deletionCompletion: ActionCompletion?
     private var insertionCompletion: ActionCompletion?
+    private var retrieveCompletion: ActionCompletion?
     
     private(set) var receivedMessages = [FeedStoreAction]()
     
@@ -39,7 +40,12 @@ class FeedStoreSpy: FeedStore {
         insertionCompletion = completion
     }
     
-    func retrieve() {
+    func retrieve(completion: @escaping ActionCompletion) {
         receivedMessages.append(.retrieve)
+        retrieveCompletion = completion
+    }
+    
+    func completeRetrivalWithError(_ error: NSError) {
+        retrieveCompletion?(error)
     }
 }
