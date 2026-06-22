@@ -29,7 +29,7 @@ public final class LocalFeedLoader {
         feedStore.retrieve { [weak self] result in
             guard let self else { return }
             switch result {
-            case let .success((_, timestamp)):
+            case let .success((localFeedItems, timestamp)):
                 if isExpired(timestamp: timestamp) {
                     deleteExpiredCache(completion: completion)
                 } else {

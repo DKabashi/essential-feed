@@ -78,6 +78,16 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         })
     }
     
+    func test_load_returnsNoFeedImagesWhenEmptyCacheData() {
+        let (sut, feedStore) = makeSut()
+        
+        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * (sut.validExpireDays - 1))
+        
+        expect(sut, toCompleteWithResult: .success(nil), when: {
+            feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: [])
+        })
+    }
+    
     private func expect(_ sut: LocalFeedLoader, toCompleteWithResult expectedResult: LocalFeedLoader.LoadResult?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let expectation = XCTestExpectation(description: "Wait for load to finish")
         var receivedResult: LocalFeedLoader.LoadResult?
