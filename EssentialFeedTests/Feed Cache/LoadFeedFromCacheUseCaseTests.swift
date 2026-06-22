@@ -49,24 +49,23 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedItems.first?.localItems, localItems)
     }
     
-    func test_load_deliversErrorIfCacheIsLessThanSevenDaysOld() {
+    func test_load_deliversNoErrorIfCacheIsLessThanSevenDaysOld() {
         let (sut, feedStore) = makeSut()
         
-        let expectedError = LocalFeedLoader.Error.expiredCache
-        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -8)
+        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * 5)
         let localItems = [uniqueLocalFeedItem()]
         
         let exp = XCTestExpectation(description: "Wait for load to finish")
-        var receivedError: LocalFeedLoader.Error?
+        var receivedError: NSError?
         sut.load() { error in
-            receivedError = error as? LocalFeedLoader.Error
+            receivedError = error
             exp.fulfill()
         }
         feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
         
         wait(for: [exp], timeout: 1.0)
         
-        XCTAssertEqual(expectedError, receivedError)
+        XCTAssertNil(receivedError)
     }
     
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
