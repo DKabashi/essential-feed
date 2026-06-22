@@ -43,7 +43,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_requestsDataDeletionAndReturnsNoFeedImagesIfCacheExpired() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = getTimestamp(isValid: false, validExpireDays: sut.validExpireDays)
+        let expiredTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(-1)
         let localItems = [uniqueLocalFeedItem()]
         
         expect(sut, toCompleteWithResult: .success([]), when: {
@@ -57,7 +57,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsErrorWhenRequestsDataDeletionFails() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = getTimestamp(isValid: false, validExpireDays: sut.validExpireDays)
+        let expiredTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(-1)
         let localItems = [uniqueLocalFeedItem()]
         let expectedError = anyNSError()
         
@@ -70,7 +70,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsNoFeedImagesWhenEmptyCacheData() {
         let (sut, feedStore) = makeSut()
         
-        let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
+        let validTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(1)
         
         expect(sut, toCompleteWithResult: .success([]), when: {
             feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])
@@ -80,7 +80,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsImageFeedAfterSuccessfulRetrival() {
         let (sut, feedStore) = makeSut()
         
-        let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
+        let validTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(1)
         let localItems = [uniqueLocalFeedItem()]
         let feedImages = localItems.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)}
         
@@ -120,11 +120,6 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         return (sut: sut, store: feedStore)
     }
     
-    private func getTimestamp(isValid: Bool, validExpireDays: TimeInterval) -> Date {
-        let days = isValid ? (validExpireDays - 1) : -(validExpireDays + 1)
-        return Date().addingTimeInterval(60 * 60 * 24 * days)
-    }
-    
     private func anyNSError() -> NSError {
         return NSError(domain: "", code: 0, userInfo: nil)
     }
@@ -135,5 +130,16 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     
     private func uniqueLocalFeedItem() -> LocalFeedImage {
         return LocalFeedImage(id: UUID(), url: anyURL())
+    }
+}
+
+
+private extension Date {
+    func addDays(_ days: Int) -> Date {
+        return Calendar(identifier: .gregorian).date(byAdding: .day, value: days, to: self)!
+    }
+    
+    func addSeconds(_ seconds: TimeInterval) -> Date {
+        return self + seconds
     }
 }

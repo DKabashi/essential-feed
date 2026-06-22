@@ -7,7 +7,7 @@ public final class LocalFeedLoader {
     public typealias SaveResult = NSError?
     public typealias LoadResult = LoadFeedResult
     
-    public let validExpireDays: TimeInterval = 7
+    public let validExpireDays: Int = 7
     
     public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
         feedStore = store
@@ -51,7 +51,7 @@ public final class LocalFeedLoader {
     }
     
     private func isExpired(timestamp: Date) -> Bool {
-        return Date() > timestamp.addingTimeInterval(60 * 60 * 24 * validExpireDays)
+        return Date() > timestamp.addingTimeInterval(60 * 60 * 24 * TimeInterval(validExpireDays))
     }
     
     private func cache(feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
