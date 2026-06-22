@@ -5,6 +5,7 @@ public final class LocalFeedLoader {
     private var createTimestamp: () -> Date
     
     public typealias SaveResult = NSError?
+    public typealias LoadResult = Result<[FeedImage]?, NSError>
     
     public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
         feedStore = store
@@ -22,20 +23,23 @@ public final class LocalFeedLoader {
         }
     }
     
-    public func load(completion: @escaping (SaveResult) -> Void) {
+    public func load(completion: @escaping (LoadResult) -> Void) {
         feedStore.retrieve { [weak self] result in
             guard let self else { return }
             switch result {
             case let .success((_, timestamp)):
                 let cacheIsExpired = Date() > timestamp.addingTimeInterval(60 * 60 * 24 * 7)
                 if cacheIsExpired {
-                    feedStore.deleteCachedFeed { _ in }
-                    completion(NSError(domain: "", code: 0))
+                    feedStore.deleteCachedFeed { deletionError in
+                        if deletionError == nil {
+                            completion(.success(nil))
+                        }
+                    }
                 } else {
-                    completion(nil)
+                    completion(.success(nil))
                 }
                 
-            case .failure(let error): completion(error)
+            case .failure(let error): completion(.failure(error))
             }
         }
     }
