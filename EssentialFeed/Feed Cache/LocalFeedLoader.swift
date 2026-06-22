@@ -30,8 +30,11 @@ public final class LocalFeedLoader {
             case let .success((_, timestamp)):
                 let cacheIsExpired = Date() > timestamp.addingTimeInterval(60 * 60 * 24 * 7)
                 if cacheIsExpired {
+                    // TODO: Refactor
                     feedStore.deleteCachedFeed { deletionError in
-                        if deletionError == nil {
+                        if let deletionError {
+                            completion(.failure(deletionError))
+                        } else {
                             completion(.success(nil))
                         }
                     }

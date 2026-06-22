@@ -88,6 +88,27 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve, .deleteCachedFeed])
     }
     
+    func test_load_returnsErrorWhenRequestsDataDeletionFails() {
+        let (sut, feedStore) = makeSut()
+        
+        let expiredTimestamp = Date().addingTimeInterval(60 * 60 * 24 * -8)
+        let localItems = [uniqueLocalFeedItem()]
+        
+        let exp = XCTestExpectation(description: "Wait for load to finish")
+        var receivedResult: LocalFeedLoader.LoadResult?
+        sut.load() { result in
+            receivedResult = result
+            exp.fulfill()
+        }
+        feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
+        
+        let expectedError = anyNSError()
+        feedStore.completeCacheDeletion(with: expectedError)
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertEqual(receivedResult, .failure(expectedError))
+    }
+    
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
         let feedStore = FeedStoreSpy()
         let sut = LocalFeedLoader(store: feedStore, createTimestamp: {
