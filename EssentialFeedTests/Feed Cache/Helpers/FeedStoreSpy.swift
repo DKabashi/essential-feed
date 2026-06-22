@@ -13,6 +13,8 @@ class FeedStoreSpy: FeedStore {
         case insert(items: [LocalFeedImage], timestamp: Date)
         case retrieve
     }
+    
+    private(set) var receivedItems = [(timestamp: Date, localItems: [LocalFeedImage])]()
         
     func deleteCachedFeed(completion: @escaping ActionCompletion) {
         receivedMessages.append(.deleteCachedFeed)
@@ -47,5 +49,10 @@ class FeedStoreSpy: FeedStore {
     
     func completeRetrivalWithError(_ error: NSError) {
         retrieveCompletion?(error)
+    }
+    
+    func completeRetrivalWithFeedData(timestamp: Date, localItems: [LocalFeedImage]) {
+        receivedItems.append((timestamp: timestamp, localItems: localItems))
+        retrieveCompletion?(nil)
     }
 }
