@@ -40,17 +40,6 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedItems.first?.localItems, localItems)
     }
     
-    func test_load_deliversNoErrorIfCacheIsLessThanSevenDaysOld() {
-        let (sut, feedStore) = makeSut()
-        
-        let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
-        let localItems = [uniqueLocalFeedItem()]
-        
-        expect(sut, toCompleteWithResult: .success(nil), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: localItems)
-        })
-    }
-    
     func test_load_requestsDataDeletionAndReturnsNoFeedImagesIfCacheExpired() {
         let (sut, feedStore) = makeSut()
         
@@ -85,6 +74,18 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         
         expect(sut, toCompleteWithResult: .success(nil), when: {
             feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])
+        })
+    }
+    
+    func test_load_returnsImageFeedAfterSuccessfulRetrival() {
+        let (sut, feedStore) = makeSut()
+        
+        let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
+        let localItems = [uniqueLocalFeedItem()]
+        let feedImages = localItems.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)}
+        
+        expect(sut, toCompleteWithResult: .success(feedImages), when: {
+            feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: localItems)
         })
     }
     

@@ -32,8 +32,10 @@ public final class LocalFeedLoader {
             case let .success((localFeedItems, timestamp)):
                 if isExpired(timestamp: timestamp) {
                     deleteExpiredCache(completion: completion)
-                } else {
+                } else if localFeedItems.isEmpty {
                     completion(.success(nil))
+                } else {
+                    completion(.success(localFeedItems.feedImages))
                 }
             case .failure(let error): completion(.failure(error))
             }
@@ -66,5 +68,11 @@ public final class LocalFeedLoader {
 private extension Array where Element == FeedImage {
     var localFeed: [LocalFeedImage] {
         self.map { LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url) }
+    }
+}
+
+private extension Array where Element == LocalFeedImage {
+    var feedImages: [FeedImage] {
+        self.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url) }
     }
 }
