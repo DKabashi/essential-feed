@@ -4,7 +4,7 @@ import EssentialFeed
 class FeedStoreSpy: FeedStore {
     private var deletionCompletion: ActionCompletion?
     private var insertionCompletion: ActionCompletion?
-    private var retrieveCompletion: ActionCompletion?
+    private var retrieveCompletion: RetriveCompletion?
     
     private(set) var receivedMessages = [FeedStoreAction]()
     
@@ -42,17 +42,18 @@ class FeedStoreSpy: FeedStore {
         insertionCompletion = completion
     }
     
-    func retrieve(completion: @escaping ActionCompletion) {
+    func retrieve(completion: @escaping RetriveCompletion) {
         receivedMessages.append(.retrieve)
         retrieveCompletion = completion
     }
     
     func completeRetrivalWithError(_ error: NSError) {
-        retrieveCompletion?(error)
+        retrieveCompletion?(.failure(error))
     }
     
     func completeRetrivalWithFeedData(timestamp: Date, localItems: [LocalFeedImage]) {
+        // TODO: Check if it is needed
         receivedItems.append((timestamp: timestamp, localItems: localItems))
-        retrieveCompletion?(nil)
+        retrieveCompletion?(.success((localItems: localItems, timestamp: timestamp)))
     }
 }

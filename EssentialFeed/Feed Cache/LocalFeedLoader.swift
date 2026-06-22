@@ -6,6 +6,10 @@ public final class LocalFeedLoader {
     
     public typealias SaveResult = NSError?
     
+    public enum Error: Swift.Error {
+        case expiredCache
+    }
+    
     public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
         feedStore = store
         self.createTimestamp = createTimestamp
@@ -23,8 +27,17 @@ public final class LocalFeedLoader {
     }
     
     public func load(completion: @escaping (SaveResult) -> Void) {
-        feedStore.retrieve { error in
-            completion(error)
+        feedStore.retrieve { result in
+            switch result {
+            case let .success((_, timestamp)):
+                if Date() > timestamp.addingTimeInterval(60 * 60 * 24 * 7) {
+                    completion(Error.expiredCache as NSError)
+                } else {
+                    completion(nil)
+                }
+                
+            case .failure(let error): completion(error)
+            }
         }
     }
     
