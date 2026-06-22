@@ -54,6 +54,18 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve, .deleteCachedFeed])
     }
     
+    func test_load_returnsNoFeedImagesIfCacheIsExactlySevenDays() {
+        let (sut, feedStore) = makeSut()
+        
+        let expiredTimestamp = Date().addDays(-sut.validExpireDays)
+        let localItems = [uniqueLocalFeedItem()]
+        
+        expect(sut, toCompleteWithResult: .success([]), when: {
+            feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
+            feedStore.completeCacheDeletionWithSuccess()
+        })
+    }
+    
     func test_load_returnsErrorWhenRequestsDataDeletionFails() {
         let (sut, feedStore) = makeSut()
         
