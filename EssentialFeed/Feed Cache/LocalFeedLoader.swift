@@ -5,7 +5,7 @@ public final class LocalFeedLoader {
     private var createTimestamp: () -> Date
     
     public typealias SaveResult = NSError?
-    public typealias LoadResult = Result<[FeedImage]?, NSError>
+    public typealias LoadResult = LoadFeedResult
     
     public let validExpireDays: TimeInterval = 7
     
@@ -32,8 +32,6 @@ public final class LocalFeedLoader {
             case let .success((localFeedItems, timestamp)):
                 if isExpired(timestamp: timestamp) {
                     deleteExpiredCache(completion: completion)
-                } else if localFeedItems.isEmpty {
-                    completion(.success(nil))
                 } else {
                     completion(.success(localFeedItems.feedImages))
                 }
@@ -47,7 +45,7 @@ public final class LocalFeedLoader {
             if let deletionError {
                 completion(.failure(deletionError))
             } else {
-                completion(.success(nil))
+                completion(.success([]))
             }
         }
     }

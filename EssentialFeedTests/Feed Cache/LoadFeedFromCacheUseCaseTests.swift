@@ -46,7 +46,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let expiredTimestamp = getTimestamp(isValid: false, validExpireDays: sut.validExpireDays)
         let localItems = [uniqueLocalFeedItem()]
         
-        expect(sut, toCompleteWithResult: .success(nil), when: {
+        expect(sut, toCompleteWithResult: .success([]), when: {
             feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
             feedStore.completeCacheDeletionWithSuccess()
         })
@@ -72,7 +72,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         
         let validTimestamp = getTimestamp(isValid: true, validExpireDays: sut.validExpireDays)
         
-        expect(sut, toCompleteWithResult: .success(nil), when: {
+        expect(sut, toCompleteWithResult: .success([]), when: {
             feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])
         })
     }
@@ -91,10 +91,16 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     
     private func expect(_ sut: LocalFeedLoader, toCompleteWithResult expectedResult: LocalFeedLoader.LoadResult?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let expectation = XCTestExpectation(description: "Wait for load to finish")
-        var receivedResult: LocalFeedLoader.LoadResult?
         
-        sut.load { result in
-            receivedResult = result
+        sut.load { receivedResult in
+            switch (receivedResult, expectedResult) {
+            case let (.failure(receivedError), .failure(expectedResult)):
+                XCTAssertEqual(receivedError as NSError, expectedResult as NSError, file: file, line: line)
+            case let (.success(receivedItems), .success(expetedItems)):
+                XCTAssertEqual(receivedItems, expetedItems, file: file, line: line)
+            default:
+                XCTFail("Expected \(expectedResult.debugDescription), but got \(receivedResult) instead", file: file, line: line)
+            }
             expectation.fulfill()
         }
         
@@ -102,7 +108,6 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         
         wait(for: [expectation], timeout: 1.0)
         
-        XCTAssertEqual(receivedResult, expectedResult, file: file, line: line)
     }
     
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
