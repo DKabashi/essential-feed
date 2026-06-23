@@ -59,9 +59,10 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     func test_load_hasNoSideEffectsOnLessThanSevenDaysOldCache() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: date)
         
-        let lessThanSevenDaysOldTimestamp = Date().addDays(-7).addSeconds(1)
+        let lessThanSevenDaysOldTimestamp = date.addDays(-sut.validExpireDays).addSeconds(1)
         sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: lessThanSevenDaysOldTimestamp, localItems: [])
         
@@ -69,9 +70,10 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     func test_load_hasNoSideEffectsOnSevenDaysOldCache() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: date)
         
-        let sevenDaysOldTimestamp = Date().addDays(-7)
+        let sevenDaysOldTimestamp = date.addDays(-sut.validExpireDays)
         sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
         
@@ -79,9 +81,10 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     func test_load_hasNoSideEffectsOnMoreThanSevenDaysOldCache() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: date)
         
-        let moreThanSevenDaysOldCache = Date().addDays(-7).addingTimeInterval(-1)
+        let moreThanSevenDaysOldCache = date.addDays(-sut.validExpireDays).addSeconds(-1)
         sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
         
@@ -89,9 +92,10 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     func test_load_returnsNoFeedImagesWhenEmptyCacheData() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: date)
         
-        let validTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(1)
+        let validTimestamp = date.addDays(-sut.validExpireDays).addSeconds(1)
         
         expect(sut, toCompleteWithResult: .success([]), when: {
             feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])

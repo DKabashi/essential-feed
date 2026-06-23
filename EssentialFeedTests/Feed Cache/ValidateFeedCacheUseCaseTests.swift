@@ -28,9 +28,10 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
     }
     
     func test_validateCache_doesNotDeleteLessThanSevenDaysOldCache() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: date)
         
-        let lessThanSevenDaysOldTimestamp = Date().addDays(-7).addSeconds(1)
+        let lessThanSevenDaysOldTimestamp = date.addDays(-sut.validExpireDays).addSeconds(1)
         sut.validateCache()
         feedStore.completeRetrivalWithFeedData(timestamp: lessThanSevenDaysOldTimestamp, localItems: [])
         
@@ -38,9 +39,10 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
     }
     
     func test_validateCache_deletesSevenDaysOldCache() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: date)
         
-        let sevenDaysOldTimestamp = Date().addDays(-7)
+        let sevenDaysOldTimestamp = date.addDays(-sut.validExpireDays)
         sut.validateCache()
         feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
         
@@ -48,9 +50,10 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
     }
     
     func test_validateCache_deletesMoreThanSevenDaysOldCache() {
-        let (sut, feedStore) = makeSut()
+        let date = Date()
+        let (sut, feedStore) = makeSut(timestamp: Date())
         
-        let moreThanSevenDaysOldCache = Date().addDays(-7).addingTimeInterval(-1)
+        let moreThanSevenDaysOldCache = date.addDays(-sut.validExpireDays).addSeconds(-1)
         sut.validateCache()
         feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
         

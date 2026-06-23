@@ -16,7 +16,7 @@ public final class LocalFeedLoader {
         guard let expiredDate = calendar.date(byAdding: .day, value: validExpireDays, to: timestamp) else {
             return true
         }
-        return Date() > expiredDate
+        return createTimestamp() >= expiredDate
     }
 }
 
