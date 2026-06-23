@@ -49,6 +49,15 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
     
+    func test_load_hasNoSideEffectsOnEmptyCache() {
+        let (sut, feedStore) = makeSut()
+        
+        sut.load { _ in }
+        feedStore.completeRetrivalWithFeedData(timestamp: Date(), localItems: [])
+        
+        XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
+    }
+    
     func test_load_requestsDataDeletionAndReturnsNoFeedImagesIfCacheExpired() {
         let (sut, feedStore) = makeSut()
         
