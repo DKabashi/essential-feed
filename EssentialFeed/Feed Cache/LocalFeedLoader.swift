@@ -41,6 +41,15 @@ public final class LocalFeedLoader {
         }
     }
     
+    public func validateCache() {
+        feedStore.retrieve { [unowned self] result in
+            switch result {
+            case .failure: deleteExpiredCache { _ in }
+            default: break
+            }
+        }
+    }
+    
     private func deleteExpiredCache(completion: @escaping (LoadResult) -> Void) {
         feedStore.deleteCachedFeed { deletionError in
             if let deletionError {
