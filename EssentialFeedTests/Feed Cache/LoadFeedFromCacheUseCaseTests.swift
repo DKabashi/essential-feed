@@ -58,35 +58,35 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
     
-    func test_load_hasNoSideEffectsOnLessThanSevenDaysOldCache() {
+    func test_load_hasNoSideEffectsBeforeExpirationDate() {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let lessThanSevenDaysOldTimestamp = date.addDays(-validExpireDays).addSeconds(1)
+        let beforeExpirationTimestamp = date.minusFeedCacheMaxAge().addSeconds(1)
         sut.loadFeed { _ in }
-        feedStore.completeRetrivalWithFeedData(timestamp: lessThanSevenDaysOldTimestamp, localItems: [])
+        feedStore.completeRetrivalWithFeedData(timestamp: beforeExpirationTimestamp, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
     
-    func test_load_hasNoSideEffectsOnSevenDaysOldCache() {
+    func test_load_hasNoSideEffectsOnExpirationDate() {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let sevenDaysOldTimestamp = date.addDays(-validExpireDays)
+        let expirationDateTimestamp = date.minusFeedCacheMaxAge()
         sut.loadFeed { _ in }
-        feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
+        feedStore.completeRetrivalWithFeedData(timestamp: expirationDateTimestamp, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
     
-    func test_load_hasNoSideEffectsOnMoreThanSevenDaysOldCache() {
+    func test_load_hasNoSideEffectsAfterExpirationDate() {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let moreThanSevenDaysOldCache = date.addDays(-validExpireDays).addSeconds(-1)
+        let expiredDateTimestamp = date.minusFeedCacheMaxAge().addSeconds(-1)
         sut.loadFeed { _ in }
-        feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
+        feedStore.completeRetrivalWithFeedData(timestamp: expiredDateTimestamp, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
@@ -95,22 +95,19 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let validTimestamp = date.addDays(-validExpireDays).addSeconds(1)
-        
         expect(sut, toCompleteWithResult: .success([]), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])
+            feedStore.completeRetrivalWithFeedData(timestamp: Date(), localItems: [])
         })
     }
     
     func test_load_returnsImageFeedAfterSuccessfulRetrival() {
         let (sut, feedStore) = makeSut()
         
-        let validTimestamp = Date().addDays(-validExpireDays).addSeconds(1)
         let localItems = [uniqueLocalFeedItem()]
         let feedImages = localItems.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)}
         
         expect(sut, toCompleteWithResult: .success(feedImages), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: localItems)
+            feedStore.completeRetrivalWithFeedData(timestamp: Date(), localItems: localItems)
         })
     }
     
