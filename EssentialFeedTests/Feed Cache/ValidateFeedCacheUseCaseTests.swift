@@ -50,9 +50,9 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
     func test_validateCache_deletesMoreThanSevenDaysOldCache() {
         let (sut, feedStore) = makeSut()
         
-        let sevenDaysOldTimestamp = Date().addDays(-7).addingTimeInterval(-1)
+        let moreThanSevenDaysOldCache = Date().addDays(-7).addingTimeInterval(-1)
         sut.validateCache()
-        feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
+        feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve, .deleteCachedFeed])
     }
