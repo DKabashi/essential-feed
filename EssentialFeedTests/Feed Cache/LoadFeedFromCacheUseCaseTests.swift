@@ -144,27 +144,4 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut: sut, store: feedStore)
     }
-    
-    private func anyNSError() -> NSError {
-        return NSError(domain: "", code: 0, userInfo: nil)
-    }
-    
-    private func anyURL() -> URL {
-        return URL(string: "http://any-url.com")!
-    }
-    
-    private func uniqueLocalFeedItem() -> LocalFeedImage {
-        return LocalFeedImage(id: UUID(), url: anyURL())
-    }
-}
-
-
-private extension Date {
-    func addDays(_ days: Int) -> Date {
-        return Calendar(identifier: .gregorian).date(byAdding: .day, value: days, to: self)!
-    }
-    
-    func addSeconds(_ seconds: TimeInterval) -> Date {
-        return self + seconds
-    }
 }

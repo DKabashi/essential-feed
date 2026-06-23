@@ -129,17 +129,5 @@ final class CacheFeedUseCaseTests: XCTestCase {
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut: sut, store: feedStore)
     }
-    
-    private func uniqueFeedItem() -> FeedImage {
-        return FeedImage(id: UUID(), url: anyURL())
-    }
-    
-    private func anyURL() -> URL {
-        return URL(string: "http://any-url.com")!
-    }
-    
-    private func anyNSError() -> NSError {
-        return NSError(domain: "", code: 0, userInfo: nil)
-    }
 }
 
