@@ -9,6 +9,8 @@ func uniqueLocalFeedItem() -> LocalFeedImage {
     return LocalFeedImage(id: UUID(), url: anyURL())
 }
 
+var validExpireDays: Int = 7
+
 extension Date {
     func addDays(_ days: Int) -> Date {
         return Calendar(identifier: .gregorian).date(byAdding: .day, value: days, to: self)!

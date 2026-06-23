@@ -31,7 +31,7 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let lessThanSevenDaysOldTimestamp = date.addDays(-sut.validExpireDays).addSeconds(1)
+        let lessThanSevenDaysOldTimestamp = date.addDays(-validExpireDays).addSeconds(1)
         sut.validateCache()
         feedStore.completeRetrivalWithFeedData(timestamp: lessThanSevenDaysOldTimestamp, localItems: [])
         
@@ -42,7 +42,7 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let sevenDaysOldTimestamp = date.addDays(-sut.validExpireDays)
+        let sevenDaysOldTimestamp = date.addDays(-validExpireDays)
         sut.validateCache()
         feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
         
@@ -53,7 +53,7 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: Date())
         
-        let moreThanSevenDaysOldCache = date.addDays(-sut.validExpireDays).addSeconds(-1)
+        let moreThanSevenDaysOldCache = date.addDays(-validExpireDays).addSeconds(-1)
         sut.validateCache()
         feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
         

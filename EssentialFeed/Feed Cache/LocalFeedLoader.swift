@@ -1,22 +1,33 @@
 import Foundation
 
-public final class LocalFeedLoader {
-    private var feedStore: FeedStore
-    private var createTimestamp: () -> Date
+private final class FeedCachePolicy {
     private let calendar = Calendar(identifier: .gregorian)
+    private var createTimestamp: () -> Date
     
     public let validExpireDays: Int = 7
     
-    public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
-        feedStore = store
+    internal init(createTimestamp: @escaping () -> Date) {
         self.createTimestamp = createTimestamp
     }
     
-    private func isExpired(timestamp: Date) -> Bool {
+    internal func isExpired(timestamp: Date) -> Bool {
         guard let expiredDate = calendar.date(byAdding: .day, value: validExpireDays, to: timestamp) else {
             return true
         }
         return createTimestamp() >= expiredDate
+    }
+}
+
+public final class LocalFeedLoader {
+    private var feedStore: FeedStore
+    private var createTimestamp: () -> Date
+    private let calendar = Calendar(identifier: .gregorian)
+    private var cachePolicy: FeedCachePolicy
+    
+    public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
+        feedStore = store
+        self.createTimestamp = createTimestamp
+        cachePolicy = FeedCachePolicy(createTimestamp: createTimestamp)
     }
 }
 
@@ -66,7 +77,7 @@ extension LocalFeedLoader {
             switch result {
             case .failure:
                 feedStore.deleteCachedFeed { _ in }
-            case .success((_, let timestamp)) where isExpired(timestamp: timestamp):
+            case .success((_, let timestamp)) where cachePolicy.isExpired(timestamp: timestamp):
                 feedStore.deleteCachedFeed { _ in }
             case .success:
                 break

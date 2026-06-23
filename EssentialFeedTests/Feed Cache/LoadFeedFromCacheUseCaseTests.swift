@@ -62,7 +62,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let lessThanSevenDaysOldTimestamp = date.addDays(-sut.validExpireDays).addSeconds(1)
+        let lessThanSevenDaysOldTimestamp = date.addDays(-validExpireDays).addSeconds(1)
         sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: lessThanSevenDaysOldTimestamp, localItems: [])
         
@@ -73,7 +73,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let sevenDaysOldTimestamp = date.addDays(-sut.validExpireDays)
+        let sevenDaysOldTimestamp = date.addDays(-validExpireDays)
         sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
         
@@ -84,7 +84,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let moreThanSevenDaysOldCache = date.addDays(-sut.validExpireDays).addSeconds(-1)
+        let moreThanSevenDaysOldCache = date.addDays(-validExpireDays).addSeconds(-1)
         sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
         
@@ -95,7 +95,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let date = Date()
         let (sut, feedStore) = makeSut(timestamp: date)
         
-        let validTimestamp = date.addDays(-sut.validExpireDays).addSeconds(1)
+        let validTimestamp = date.addDays(-validExpireDays).addSeconds(1)
         
         expect(sut, toCompleteWithResult: .success([]), when: {
             feedStore.completeRetrivalWithFeedData(timestamp: validTimestamp, localItems: [])
@@ -105,7 +105,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_returnsImageFeedAfterSuccessfulRetrival() {
         let (sut, feedStore) = makeSut()
         
-        let validTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(1)
+        let validTimestamp = Date().addDays(-validExpireDays).addSeconds(1)
         let localItems = [uniqueLocalFeedItem()]
         let feedImages = localItems.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)}
         
