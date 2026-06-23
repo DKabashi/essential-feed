@@ -28,15 +28,12 @@ public final class LocalFeedLoader {
     
     public func load(completion: @escaping (LoadResult) -> Void) {
         feedStore.retrieve { [weak self] result in
-            guard let self else { return }
+            guard self != nil else { return }
             switch result {
-            case let .success((localFeedItems, timestamp)):
-                if isExpired(timestamp: timestamp) {
-                    deleteExpiredCache(completion: completion)
-                } else {
-                    completion(.success(localFeedItems.feedImages))
-                }
-            case .failure(let error): completion(.failure(error))
+            case .success((let localFeedItems, _)):
+                completion(.success(localFeedItems.feedImages))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }

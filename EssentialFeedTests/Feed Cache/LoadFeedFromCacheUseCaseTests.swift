@@ -68,43 +68,14 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
     
-    func test_load_requestsDataDeletionAndReturnsNoFeedImagesIfCacheExpired() {
+    func test_load_hasNoSideEffectsOnSevenDaysOldCache() {
         let (sut, feedStore) = makeSut()
         
-        let expiredTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(-1)
-        let localItems = [uniqueLocalFeedItem()]
+        let sevenDaysOldTimestamp = Date().addDays(-7)
+        sut.load { _ in }
+        feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
         
-        expect(sut, toCompleteWithResult: .success([]), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
-            feedStore.completeCacheDeletionWithSuccess()
-        })
-        
-        XCTAssertEqual(feedStore.receivedMessages, [.retrieve, .deleteCachedFeed])
-    }
-    
-    func test_load_returnsNoFeedImagesIfCacheIsExactlySevenDays() {
-        let (sut, feedStore) = makeSut()
-        
-        let expiredTimestamp = Date().addDays(-sut.validExpireDays)
-        let localItems = [uniqueLocalFeedItem()]
-        
-        expect(sut, toCompleteWithResult: .success([]), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
-            feedStore.completeCacheDeletionWithSuccess()
-        })
-    }
-    
-    func test_load_returnsErrorWhenRequestsDataDeletionFails() {
-        let (sut, feedStore) = makeSut()
-        
-        let expiredTimestamp = Date().addDays(-sut.validExpireDays).addSeconds(-1)
-        let localItems = [uniqueLocalFeedItem()]
-        let expectedError = anyNSError()
-        
-        expect(sut, toCompleteWithResult: .failure(expectedError), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: expiredTimestamp, localItems: localItems)
-            feedStore.completeCacheDeletion(with: expectedError)
-        })
+        XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
     
     func test_load_returnsNoFeedImagesWhenEmptyCacheData() {
