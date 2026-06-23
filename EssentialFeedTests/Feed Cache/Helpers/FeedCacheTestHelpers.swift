@@ -15,10 +15,12 @@ extension Date {
         return addDays(-validExpireDays)
     }
     
-    func addDays(_ days: Int) -> Date {
+    private func addDays(_ days: Int) -> Date {
         return Calendar(identifier: .gregorian).date(byAdding: .day, value: days, to: self)!
     }
-    
+}
+
+extension Date {
     func addSeconds(_ seconds: TimeInterval) -> Date {
         return self + seconds
     }
