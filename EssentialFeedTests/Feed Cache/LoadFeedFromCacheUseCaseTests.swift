@@ -12,7 +12,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_requestsRetrival() {
         let (sut, feedStore) = makeSut()
         
-        sut.load() { _ in }
+        sut.loadFeed { _ in }
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
@@ -31,7 +31,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         
         let timestamp = Date()
         let localItems = [uniqueLocalFeedItem()]
-        sut.load { _ in }
+        sut.loadFeed { _ in }
         
         feedStore.completeRetrivalWithFeedData(timestamp: timestamp, localItems: localItems)
         
@@ -43,7 +43,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_hasNoSideEffectsOnRetrivalFailure() {
         let (sut, feedStore) = makeSut()
         
-        sut.load { _ in }
+        sut.loadFeed { _ in }
         feedStore.completeRetrivalWithError(anyNSError())
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
@@ -52,7 +52,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_hasNoSideEffectsOnEmptyCache() {
         let (sut, feedStore) = makeSut()
         
-        sut.load { _ in }
+        sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: Date(), localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
@@ -62,7 +62,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, feedStore) = makeSut()
         
         let lessThanSevenDaysOldTimestamp = Date().addDays(-7).addSeconds(1)
-        sut.load { _ in }
+        sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: lessThanSevenDaysOldTimestamp, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
@@ -72,7 +72,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, feedStore) = makeSut()
         
         let sevenDaysOldTimestamp = Date().addDays(-7)
-        sut.load { _ in }
+        sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: sevenDaysOldTimestamp, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
@@ -82,7 +82,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, feedStore) = makeSut()
         
         let moreThanSevenDaysOldCache = Date().addDays(-7).addingTimeInterval(-1)
-        sut.load { _ in }
+        sut.loadFeed { _ in }
         feedStore.completeRetrivalWithFeedData(timestamp: moreThanSevenDaysOldCache, localItems: [])
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
@@ -115,7 +115,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store, createTimestamp: Date.init)
         
         var receivedCallbacks = [LoadFeedResult]()
-        sut?.load { receivedCallbacks.append($0) }
+        sut?.loadFeed { receivedCallbacks.append($0) }
         
         sut = nil
         store.completeRetrivalWithError(anyNSError())
@@ -126,7 +126,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     private func expect(_ sut: LocalFeedLoader, toCompleteWithResult expectedResult: LocalFeedLoader.LoadResult?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let expectation = XCTestExpectation(description: "Wait for load to finish")
         
-        sut.load { receivedResult in
+        sut.loadFeed { receivedResult in
             switch (receivedResult, expectedResult) {
             case let (.failure(receivedError), .failure(expectedResult)):
                 XCTAssertEqual(receivedError as NSError, expectedResult as NSError, file: file, line: line)

@@ -5,9 +5,6 @@ public final class LocalFeedLoader {
     private var createTimestamp: () -> Date
     private let calendar = Calendar(identifier: .gregorian)
     
-    public typealias SaveResult = NSError?
-    public typealias LoadResult = LoadFeedResult
-    
     public let validExpireDays: Int = 7
     
     public init(store: FeedStore, createTimestamp: @escaping () -> Date) {
@@ -24,6 +21,8 @@ public final class LocalFeedLoader {
 }
 
 extension LocalFeedLoader {
+    public typealias SaveResult = NSError?
+    
     public func save(feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
         feedStore.deleteCachedFeed { [weak self] deletionError in
             guard let self else { return }
@@ -43,9 +42,11 @@ extension LocalFeedLoader {
         })
     }
 }
+
+extension LocalFeedLoader: FeedLoader {
+    public typealias LoadResult = LoadFeedResult
     
-extension LocalFeedLoader {
-    public func load(completion: @escaping (LoadResult) -> Void) {
+    public func loadFeed(completion: @escaping (LoadResult) -> Void) {
         feedStore.retrieve { [weak self] result in
             guard self != nil else { return }
             switch result {
@@ -57,7 +58,7 @@ extension LocalFeedLoader {
         }
     }
 }
-    
+
 extension LocalFeedLoader {
     public func validateCache() {
         feedStore.retrieve { [weak self] result in
