@@ -39,7 +39,8 @@ public final class LocalFeedLoader {
     }
     
     public func validateCache() {
-        feedStore.retrieve { [unowned self] result in
+        feedStore.retrieve { [weak self] result in
+            guard let self else { return }
             switch result {
             case .failure:
                 deleteExpiredCache { _ in }
