@@ -101,6 +101,19 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         })
     }
     
+    func test_load_doesNotReceiveCallbackOnInstanceDeallocation() {
+        let store = FeedStoreSpy()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, createTimestamp: Date.init)
+        
+        var receivedCallbacks = [LoadFeedResult]()
+        sut?.load { receivedCallbacks.append($0) }
+        
+        sut = nil
+        store.completeRetrivalWithError(anyNSError())
+        
+        XCTAssertTrue(receivedCallbacks.isEmpty)
+    }
+    
     private func expect(_ sut: LocalFeedLoader, toCompleteWithResult expectedResult: LocalFeedLoader.LoadResult?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let expectation = XCTestExpectation(description: "Wait for load to finish")
         
