@@ -44,8 +44,12 @@ public final class LocalFeedLoader {
     public func validateCache() {
         feedStore.retrieve { [unowned self] result in
             switch result {
-            case .failure: deleteExpiredCache { _ in }
-            default: break
+            case .failure:
+                deleteExpiredCache { _ in }
+            case .success((_, let timestamp)) where isExpired(timestamp: timestamp):
+                deleteExpiredCache { _ in }
+            case .success:
+                break
             }
         }
     }
