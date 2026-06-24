@@ -120,6 +120,22 @@ final class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetriveWithResult: .failure(anyNSError()))
     }
     
+    func test_insert_overridesPreviouslyInsertedValues() {
+        let sut = makeSUT()
+        let firstInsertionFeed = [uniqueLocalFeedItem()]
+        let firstInsertionTimestamp = Date()
+        
+        let insertionError = insert((feed: firstInsertionFeed, timestamp: firstInsertionTimestamp), to: sut)
+        XCTAssertNil(insertionError, "Expected first insertion to be successful")
+        
+        let latestInsertionFeed = [uniqueLocalFeedItem(), uniqueLocalFeedItem()]
+        let latestInsertionTimestamp = Date().addSeconds(5)
+        let latestInsertionError = insert((feed: latestInsertionFeed, timestamp: latestInsertionTimestamp), to: sut)
+        XCTAssertNil(latestInsertionError, "Expected second insertion to successfully override the first")
+        
+        expect(sut, toRetriveWithResult: .success(latestInsertionFeed, latestInsertionTimestamp))
+    }
+    
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(storeURL: testSpecificStoreURL())
         checkForMemoryLeaks(for: sut, file: file, line: line)
@@ -148,14 +164,17 @@ final class CodableFeedStoreTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
     
-    private func insert(_ cache: (feed: [LocalFeedImage], timestamp: Date), to sut: CodableFeedStore) {
+    @discardableResult
+    private func insert(_ cache: (feed: [LocalFeedImage], timestamp: Date), to sut: CodableFeedStore) -> NSError? {
         let exp = XCTestExpectation(description: "Wait for insertion to complete")
+        var receivedError: NSError?
         sut.insert(cache.feed, timestamp: cache.timestamp) { insertionResult in
-            XCTAssertNil(insertionResult, "Expected insertion to be successful")
+            receivedError = insertionResult
             exp.fulfill()
         }
         
         wait(for: [exp], timeout: 1.0)
+        return receivedError
     }
     
     private func testSpecificStoreURL() -> URL {
