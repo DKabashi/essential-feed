@@ -59,8 +59,17 @@ class CodableFeedStore {
     }
     
     func deleteCachedFeed(completion: @escaping FeedStore.DeleteCompletion) {
-        try? FileManager.default.removeItem(at: storeURL)
-        completion(nil)
+        guard FileManager.default.fileExists(atPath: storeURL.path()) else {
+            completion(nil)
+            return
+        }
+        
+        do {
+            try FileManager.default.removeItem(at: storeURL)
+            completion(nil)
+        } catch {
+            completion(error as NSError)
+        }
     }
 }
 
@@ -173,6 +182,16 @@ final class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetriveWithResult: .empty)
     }
     
+    func test_deleteCachedFeed_deliversErrorOnFailedDeletion() {
+        let undeletableFileURL = cachesDirectory()
+        let sut = makeSUT(storeURL: undeletableFileURL)
+        
+        insert((feed: [uniqueLocalFeedItem()], timestamp: Date()), to: sut)
+        
+        let deletionError = deleteCachedFeed(sut)
+        XCTAssertNotNil(deletionError)
+    }
+    
     private func makeSUT(storeURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(storeURL: storeURL ?? testSpecificStoreURL())
         checkForMemoryLeaks(for: sut, file: file, line: line)
@@ -240,5 +259,9 @@ final class CodableFeedStoreTests: XCTestCase {
     
     private func removeStoreArtifact() {
         try? FileManager.default.removeItem(at: testSpecificStoreURL())
+    }
+    
+    private func cachesDirectory() -> URL {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
     }
 }
