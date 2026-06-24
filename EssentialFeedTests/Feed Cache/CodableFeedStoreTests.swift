@@ -73,19 +73,8 @@ final class CodableFeedStoreTests: XCTestCase {
     func test_retrieve_hasNoSideEffectsOnEmptyCache() {
         let sut = makeSUT()
         
-        let exp = XCTestExpectation(description: "Wait for the two retrivals to complete")
-        sut.retrieve { firstResult in
-            sut.retrieve { secondResult in
-                switch (firstResult, secondResult) {
-                case (.empty, .empty):
-                    exp.fulfill()
-                default:
-                    XCTFail("Expected empty result twice from empty cache, but got \(firstResult) and \(secondResult) instead")
-                }
-            }
-        }
-        
-        wait(for: [exp], timeout: 1.0)
+        expect(sut, toRetriveWithResult: .empty)
+        expect(sut, toRetriveWithResult: .empty)
     }
     
     func test_retrieve_returnsInsertedDataAfterSuccessfulInsertion() {
@@ -108,29 +97,16 @@ final class CodableFeedStoreTests: XCTestCase {
         let sut = makeSUT()
         let feed = [uniqueLocalFeedItem()]
         let timestamp = Date()
-        let exp = XCTestExpectation(description: "Wait for retrieve and insertion to complete")
         
+        let exp = XCTestExpectation(description: "Wait for insertion to complete")
         sut.insert(feed, timestamp: timestamp) { insertionResult in
             XCTAssertNil(insertionResult, "Expected insertion to be successful")
-
-            sut.retrieve { firstRetrivalResult in
-                sut.retrieve { secondRetrivalResult in
-                    switch (firstRetrivalResult, secondRetrivalResult) {
-                    case (.success(let firstRecievedLocalItems, let firstReceivedTimestamp), .success(let secondRecievedLocalItems, let secondReceivedTimestamp)):
-                        XCTAssertEqual(firstReceivedTimestamp, timestamp)
-                        XCTAssertEqual(firstRecievedLocalItems, feed)
-                        
-                        XCTAssertEqual(firstReceivedTimestamp, timestamp)
-                        XCTAssertEqual(firstRecievedLocalItems, feed)
-                    default:
-                        XCTFail("Expected success with timestamp \(timestamp) and feed: \(feed) from both retrivals, but got \(firstRetrivalResult), and \(secondRetrivalResult) instead")
-                    }
-                    exp.fulfill()
-                }
-            }
+            exp.fulfill()
         }
-        
         wait(for: [exp], timeout: 1.0)
+        
+        expect(sut, toRetriveWithResult: .success(feed, timestamp))
+        expect(sut, toRetriveWithResult: .success(feed, timestamp))
     }
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
