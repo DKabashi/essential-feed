@@ -47,11 +47,16 @@ class CodableFeedStore {
     }
 
     func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
-        let encoder = JSONEncoder()
-        let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
-        let encodedData = try! encoder.encode(cache)
-        try! encodedData.write(to: storeURL)
-        completion(nil)
+        do {
+            let encoder = JSONEncoder()
+            let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
+            let encodedData = try encoder.encode(cache)
+            try encodedData.write(to: storeURL)
+            completion(nil)
+        } catch {
+            completion(error as NSError)
+        }
+        
     }
 }
 
@@ -136,8 +141,16 @@ final class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetriveWithResult: .success(latestInsertionFeed, latestInsertionTimestamp))
     }
     
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
-        let sut = CodableFeedStore(storeURL: testSpecificStoreURL())
+    func test_insert_deliversErrorOnFailedInsertion() {
+        let invalidStoreURL = URL(string: "invalidStore://invalid")!
+        let sut = makeSUT(storeURL: invalidStoreURL)
+        
+        let insertionError = insert((feed: [uniqueLocalFeedItem()], timestamp: Date()), to: sut)
+        XCTAssertNotNil(insertionError)
+    }
+    
+    private func makeSUT(storeURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
+        let sut = CodableFeedStore(storeURL: storeURL ?? testSpecificStoreURL())
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return sut
     }
