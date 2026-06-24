@@ -36,9 +36,14 @@ class CodableFeedStore {
         guard let data = try? Data(contentsOf: storeURL) else {
             return completion(.empty)
         }
-        let decoder = JSONDecoder()
-        let decodedCache = try! decoder.decode(Cache.self, from: data)
-        completion(.success(decodedCache.toLocalFeed, decodedCache.timestamp))
+        
+        do {
+            let decoder = JSONDecoder()
+            let decodedCache = try decoder.decode(Cache.self, from: data)
+            completion(.success(decodedCache.toLocalFeed, decodedCache.timestamp))
+        } catch {
+            completion(.failure(error as NSError))
+        }
     }
 
     func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
@@ -98,6 +103,14 @@ final class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetriveWithResult: .success(feed, timestamp))
     }
     
+    func test_retrieve_deliversFailureOnRetrivalError() {
+        let sut = makeSUT()
+        
+        try! "Error insertion".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
+        
+        expect(sut, toRetriveWithResult: .failure(anyNSError()))
+    }
+    
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(storeURL: testSpecificStoreURL())
         checkForMemoryLeaks(for: sut, file: file, line: line)
@@ -109,14 +122,14 @@ final class CodableFeedStoreTests: XCTestCase {
         
         sut.retrieve { retrivalResult in
             switch (retrivalResult, expectedResult) {
+            case (.empty, .empty), (.failure, .failure):
+                break
             case (
                 let .success(recievedLocalItems, receivedTimestamp),
                 let .success(expectedLocalItems, expectedTimestamp)
             ):
                 XCTAssertEqual(receivedTimestamp, expectedTimestamp)
                 XCTAssertEqual(recievedLocalItems, expectedLocalItems)
-            case (.empty, .empty):
-                break
             default:
                 XCTFail("Expected retrive to complete with \(expectedResult), but got \(retrivalResult) result instead", file: file, line: line)
             }
