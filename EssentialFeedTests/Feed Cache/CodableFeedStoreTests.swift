@@ -66,7 +66,7 @@ final class CodableFeedStoreTests: XCTestCase {
     }
     
     func test_retrieve_deliversEmptyOnEmptyCache() {
-        let sut = CodableFeedStore()
+        let sut = makeSUT()
         
         let exp = XCTestExpectation(description: "Wait for retrieve to complete")
         sut.retrieve { result in
@@ -82,7 +82,7 @@ final class CodableFeedStoreTests: XCTestCase {
     }
     
     func test_retrieve_hasNoSideEffectsOnEmptyCache() {
-        let sut = CodableFeedStore()
+        let sut = makeSUT()
         
         let exp = XCTestExpectation(description: "Wait for the two retrivals to complete")
         sut.retrieve { firstResult in
@@ -100,7 +100,7 @@ final class CodableFeedStoreTests: XCTestCase {
     }
     
     func test_retrieve_returnsInsertedDataAfterSuccessfulInsertion() {
-        let sut = CodableFeedStore()
+        let sut = makeSUT()
         let feed = [uniqueLocalFeedItem()]
         let timestamp = Date()
         let exp = XCTestExpectation(description: "Wait for retrieve and insertion to complete")
@@ -121,5 +121,11 @@ final class CodableFeedStoreTests: XCTestCase {
         }
         
         wait(for: [exp], timeout: 1.0)
+    }
+    
+    private func makeSUT() -> CodableFeedStore {
+        let sut = CodableFeedStore()
+        checkForMemoryLeaks(for: sut)
+        return sut
     }
 }
