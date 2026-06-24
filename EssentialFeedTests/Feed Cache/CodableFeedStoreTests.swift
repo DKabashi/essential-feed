@@ -111,6 +111,15 @@ final class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetriveWithResult: .failure(anyNSError()))
     }
     
+    func test_retrieve_hasNoSideEffectsOnFailedRetrival() {
+        let sut = makeSUT()
+        
+        try! "Error insertion".write(to: testSpecificStoreURL(), atomically: false, encoding: .utf8)
+        
+        expect(sut, toRetriveWithResult: .failure(anyNSError()))
+        expect(sut, toRetriveWithResult: .failure(anyNSError()))
+    }
+    
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(storeURL: testSpecificStoreURL())
         checkForMemoryLeaks(for: sut, file: file, line: line)
