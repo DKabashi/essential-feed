@@ -41,8 +41,10 @@ extension LocalFeedLoader: FeedLoader {
         feedStore.retrieve { [weak self] result in
             guard self != nil else { return }
             switch result {
-            case .success((let localFeedItems, _)):
+            case .success(let localFeedItems, _):
                 completion(.success(localFeedItems.feedImages))
+            case .empty:
+                completion(.success([]))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -57,9 +59,9 @@ extension LocalFeedLoader {
             switch result {
             case .failure:
                 feedStore.deleteCachedFeed { _ in }
-            case .success((_, let timestamp)) where FeedCachePolicy.isExpired(timestamp: timestamp, against: createTimestamp()):
+            case .success(_, let timestamp) where FeedCachePolicy.isExpired(timestamp: timestamp, against: createTimestamp()):
                 feedStore.deleteCachedFeed { _ in }
-            case .success:
+            case .empty, .success:
                 break
             }
         }

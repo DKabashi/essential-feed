@@ -53,7 +53,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, feedStore) = makeSut()
         
         sut.loadFeed { _ in }
-        feedStore.completeRetrivalWithFeedData(timestamp: Date(), localItems: [])
+        feedStore.completeRetrivalWithEmptyCache()
         
         XCTAssertEqual(feedStore.receivedMessages, [.retrieve])
     }
@@ -96,7 +96,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, feedStore) = makeSut(timestamp: date)
         
         expect(sut, toCompleteWithResult: .success([]), when: {
-            feedStore.completeRetrivalWithFeedData(timestamp: Date(), localItems: [])
+            feedStore.completeRetrivalWithEmptyCache()
         })
     }
     
