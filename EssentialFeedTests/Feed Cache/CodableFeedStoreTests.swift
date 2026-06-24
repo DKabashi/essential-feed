@@ -81,14 +81,8 @@ final class CodableFeedStoreTests: XCTestCase {
         let sut = makeSUT()
         let feed = [uniqueLocalFeedItem()]
         let timestamp = Date()
-        let exp = XCTestExpectation(description: "Wait for retrieve and insertion to complete")
         
-        sut.insert(feed, timestamp: timestamp) { insertionResult in
-            XCTAssertNil(insertionResult, "Expected insertion to be successful")
-            exp.fulfill()
-        }
-        
-        wait(for: [exp], timeout: 1.0)
+        insert((feed: feed, timestamp: timestamp), to: sut)
         
         expect(sut, toRetriveWithResult: .success(feed, timestamp))
     }
@@ -98,12 +92,7 @@ final class CodableFeedStoreTests: XCTestCase {
         let feed = [uniqueLocalFeedItem()]
         let timestamp = Date()
         
-        let exp = XCTestExpectation(description: "Wait for insertion to complete")
-        sut.insert(feed, timestamp: timestamp) { insertionResult in
-            XCTAssertNil(insertionResult, "Expected insertion to be successful")
-            exp.fulfill()
-        }
-        wait(for: [exp], timeout: 1.0)
+        insert((feed: feed, timestamp: timestamp), to: sut)
         
         expect(sut, toRetriveWithResult: .success(feed, timestamp))
         expect(sut, toRetriveWithResult: .success(feed, timestamp))
@@ -131,6 +120,16 @@ final class CodableFeedStoreTests: XCTestCase {
             default:
                 XCTFail("Expected retrive to complete with \(expectedResult), but got \(retrivalResult) result instead", file: file, line: line)
             }
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 1.0)
+    }
+    
+    private func insert(_ cache: (feed: [LocalFeedImage], timestamp: Date), to sut: CodableFeedStore) {
+        let exp = XCTestExpectation(description: "Wait for insertion to complete")
+        sut.insert(cache.feed, timestamp: cache.timestamp) { insertionResult in
+            XCTAssertNil(insertionResult, "Expected insertion to be successful")
             exp.fulfill()
         }
         
