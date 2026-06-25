@@ -120,6 +120,34 @@ final class CodableFeedStoreTests: XCTestCase {
         XCTAssertNotNil(deletionError)
     }
     
+    func test_storeSideEffects_runSerially() {
+        let sut = makeSUT()
+        
+        var expectationOrder = [XCTestExpectation]()
+        
+        let operation1 = expectation(description: "Expect insertion to complete")
+        sut.insert([uniqueLocalFeedItem()], timestamp: Date()) { _ in
+            expectationOrder.append(operation1)
+            operation1.fulfill()
+        }
+        
+        let operation2 = expectation(description: "Expect deletion to complete")
+        sut.deleteCachedFeed { _ in
+            expectationOrder.append(operation2)
+            operation2.fulfill()
+        }
+        
+        let operation3 = expectation(description: "Expect insertion to complete")
+        sut.insert([uniqueLocalFeedItem()], timestamp: Date()) { _ in
+            expectationOrder.append(operation3)
+            operation3.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5.0)
+        
+        XCTAssertEqual(expectationOrder, [operation1, operation2, operation3])
+    }
+    
     private func makeSUT(storeURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
         let sut = CodableFeedStore(storeURL: storeURL ?? testSpecificStoreURL())
         checkForMemoryLeaks(for: sut, file: file, line: line)
