@@ -32,7 +32,16 @@ final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreTestSpecs {
         expect(sut, toRetriveWithResult: .empty)
     }
     
-    func test_retrieve_deliversCachedDataOnNonEmptyCache() {}
+    func test_retrieve_deliversCachedDataOnNonEmptyCache() {
+//        let sut = makeSUT()
+//        let feed = [uniqueLocalFeedItem()]
+//        let timestamp = Date()
+//        
+//        insert((feed: feed, timestamp: timestamp), to: sut)
+//        
+//        expect(sut, toRetriveWithResult: .success(feed, timestamp))
+    }
+    
     func test_retrieve_hasNoSideEffectsOnNonEmptyCacheRetrival() {}
     func test_retrieve_deliversFailureOnRetrivalError() {}
     func test_retrieve_hasNoSideEffectsOnFailedRetrival() {}
