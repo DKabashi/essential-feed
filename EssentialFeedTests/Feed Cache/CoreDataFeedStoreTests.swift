@@ -1,66 +1,88 @@
 import XCTest
 import EssentialFeed
 
-
-class CoreDataFeedStore: FeedStore {
+class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     
-    func retrieve(completion: @escaping RetriveCompletion) {
-        completion(.empty)
-    }
-    
-    func insert(_ feed: [EssentialFeed.LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-        fatalError("Implement")
-    }
-    
-    func deleteCachedFeed(completion: @escaping DeleteCompletion) {
-        fatalError("Implement")
-    }
-}
-
-final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreTestSpecs {
-
     func test_retrieve_deliversEmptyOnEmptyCache() {
         let sut = makeSUT()
         
-        expect(sut, toRetriveWithResult: .empty)
+        assertThatRetrieveDeliversEmptyOnEmptyCache(on: sut)
     }
     
     func test_retrieve_hasNoSideEffectsOnEmptyCache() {
         let sut = makeSUT()
         
-        expect(sut, toRetriveWithResult: .empty)
-        expect(sut, toRetriveWithResult: .empty)
+        assertThatRetrieveHasNoSideEffectsOnEmptyCache(on: sut)
     }
     
-    func test_retrieve_deliversCachedDataOnNonEmptyCache() {
-//        let sut = makeSUT()
-//        let feed = [uniqueLocalFeedItem()]
-//        let timestamp = Date()
-//        
-//        insert((feed: feed, timestamp: timestamp), to: sut)
-//        
-//        expect(sut, toRetriveWithResult: .success(feed, timestamp))
+    func test_retrieve_deliversFoundValuesOnNonEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
     }
     
-    func test_retrieve_hasNoSideEffectsOnNonEmptyCacheRetrival() {}
-    func test_retrieve_deliversFailureOnRetrivalError() {}
-    func test_retrieve_hasNoSideEffectsOnFailedRetrival() {}
-    func test_insert_deliversNoErrorOnEmptyCache() {}
-    func test_insert_deliversNoErrorOnNonEmptyCache() {}
-    func test_insert_overridesPreviouslyInsertedValues() {}
-    func test_insert_deliversErrorOnFailedInsertion() {}
-    func test_insert_hasNoSideEffectsOnFaliedInsertion() {}
-    func test_deleteCachedFeed_deliversNoErrorOnEmptyCache() {}
-    func test_deleteCachedFeed_hasNoSideEffectsOnEmptyCache() {}
-    func test_deleteCachedFeed_deliversNoErrorOnNonEmptyCache() {}
-    func test_deleteCachedFeed_emptiesThePreviouslyInsertedCache() {}
-    func test_deleteCachedFeed_deliversErrorOnFailedDeletion() {}
-    func test_deleteCachedFeed_hasNoSideEffectOnFaliedDeletion() {}
-    func test_storeSideEffects_runSerially() {}
+    func test_retrieve_hasNoSideEffectsOnNonEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatRetrieveHasNoSideEffectsOnNonEmptyCache(on: sut)
+    }
     
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CoreDataFeedStore {
-        let sut = CoreDataFeedStore()
+    func test_insert_deliversNoErrorOnEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatInsertDeliversNoErrorOnEmptyCache(on: sut)
+    }
+    
+    func test_insert_deliversNoErrorOnNonEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatInsertDeliversNoErrorOnNonEmptyCache(on: sut)
+    }
+    
+    func test_insert_overridesPreviouslyInsertedCacheValues() {
+        let sut = makeSUT()
+        
+        assertThatInsertOverridesPreviouslyInsertedCacheValues(on: sut)
+    }
+    
+    func test_delete_deliversNoErrorOnEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatDeleteDeliversNoErrorOnEmptyCache(on: sut)
+    }
+    
+    func test_delete_hasNoSideEffectsOnEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatDeleteHasNoSideEffectsOnEmptyCache(on: sut)
+    }
+    
+    func test_delete_deliversNoErrorOnNonEmptyCache() {
+        let sut = makeSUT()
+        
+        assertThatDeleteDeliversNoErrorOnNonEmptyCache(on: sut)
+    }
+    
+    func test_delete_emptiesPreviouslyInsertedCache() {
+        let sut = makeSUT()
+        
+        assertThatDeleteEmptiesPreviouslyInsertedCache(on: sut)
+    }
+    
+    func test_storeSideEffects_runSerially() {
+        let sut = makeSUT()
+        
+        assertThatSideEffectsRunSerially(on: sut)
+    }
+
+    // - MARK: Helpers
+    
+    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> FeedStore {
+        let storeBundle = Bundle(for: CoreDataFeedStore.self)
+        let storeURL = URL(fileURLWithPath: "/dev/null")
+        let sut = try! CoreDataFeedStore(storeURL: storeURL, bundle: storeBundle)
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return sut
     }
+
 }
