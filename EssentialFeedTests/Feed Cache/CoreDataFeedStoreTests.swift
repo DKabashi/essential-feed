@@ -20,12 +20,15 @@ class CoreDataFeedStore: FeedStore {
 final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreTestSpecs {
 
     func test_retrieve_deliversEmptyOnEmptyCache() {
-        let sut = CoreDataFeedStore()
+        let sut = makeSUT()
         
         expect(sut, toRetriveWithResult: .empty)
     }
     
-    func test_retrieve_hasNoSideEffectsOnEmptyCache() {}
+    func test_retrieve_hasNoSideEffectsOnEmptyCache() {
+        
+    }
+    
     func test_retrieve_deliversCachedDataOnNonEmptyCache() {}
     func test_retrieve_hasNoSideEffectsOnNonEmptyCacheRetrival() {}
     func test_retrieve_deliversFailureOnRetrivalError() {}
@@ -42,4 +45,10 @@ final class CoreDataFeedStoreTests: XCTestCase, FailableFeedStoreTestSpecs {
     func test_deleteCachedFeed_deliversErrorOnFailedDeletion() {}
     func test_deleteCachedFeed_hasNoSideEffectOnFaliedDeletion() {}
     func test_storeSideEffects_runSerially() {}
+    
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CoreDataFeedStore {
+        let sut = CoreDataFeedStore()
+        checkForMemoryLeaks(for: sut, file: file, line: line)
+        return sut
+    }
 }
