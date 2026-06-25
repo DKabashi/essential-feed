@@ -26,48 +26,59 @@ public class CodableFeedStore: FeedStore {
     }
 
     private var storeURL: URL
+    // TODO: Why does this queue guarantee things run serially and .global doesnt
+    private let queue = DispatchQueue(label: "\(CodableFeedStore.self)queue", qos: .userInitiated)
     
     public init(storeURL: URL) {
         self.storeURL = storeURL
     }
 
     public func retrieve(completion: @escaping RetriveCompletion) {
-        guard let data = try? Data(contentsOf: storeURL) else {
-            return completion(.empty)
-        }
-        
-        do {
-            let decoder = JSONDecoder()
-            let decodedCache = try decoder.decode(Cache.self, from: data)
-            completion(.success(decodedCache.toLocalFeed, decodedCache.timestamp))
-        } catch {
-            completion(.failure(error as NSError))
+        let storeURL = self.storeURL
+        queue.async {
+            guard let data = try? Data(contentsOf: storeURL) else {
+                return completion(.empty)
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let decodedCache = try decoder.decode(Cache.self, from: data)
+                completion(.success(decodedCache.toLocalFeed, decodedCache.timestamp))
+            } catch {
+                completion(.failure(error as NSError))
+            }
         }
     }
 
     public func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-        do {
-            let encoder = JSONEncoder()
-            let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
-            let encodedData = try encoder.encode(cache)
-            try encodedData.write(to: storeURL)
-            completion(nil)
-        } catch {
-            completion(error as NSError)
+        let storeURL = self.storeURL
+        queue.async {
+            do {
+                let encoder = JSONEncoder()
+                let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
+                let encodedData = try encoder.encode(cache)
+                try encodedData.write(to: storeURL)
+                completion(nil)
+            } catch {
+                completion(error as NSError)
+            }
         }
     }
     
     public func deleteCachedFeed(completion: @escaping DeleteCompletion) {
-        guard FileManager.default.fileExists(atPath: storeURL.path()) else {
-            completion(nil)
-            return
-        }
-        
-        do {
-            try FileManager.default.removeItem(at: storeURL)
-            completion(nil)
-        } catch {
-            completion(error as NSError)
+        let storeURL = self.storeURL
+        queue.async {
+            guard FileManager.default.fileExists(atPath: storeURL.path()) else {
+                completion(nil)
+                return
+            }
+            
+            do {
+                try FileManager.default.removeItem(at: storeURL)
+                completion(nil)
+            } catch {
+                completion(error as NSError)
+            }
         }
     }
 }
