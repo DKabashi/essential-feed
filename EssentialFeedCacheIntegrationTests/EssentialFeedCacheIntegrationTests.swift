@@ -29,6 +29,19 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         expect(sutToLoad, toLoad: .success(items))
     }
     
+    func test_save_overridesItemsSavedOnASeparateInstance() {
+        let sutToInsertFirstItems = makeSUT()
+        let sutToInsertLatestItems = makeSUT()
+        let sutToLoadLatestItems = makeSUT()
+        
+        save([uniqueFeedItem()], to: sutToInsertFirstItems)
+        
+        let latestItems = [uniqueFeedItem(), uniqueFeedItem()]
+        save(latestItems, to: sutToInsertLatestItems)
+        
+        expect(sutToLoadLatestItems, toLoad: .success(latestItems))
+    }
+    
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
         let bundle = Bundle(for: CoreDataFeedStore.self)
         let storeURL = testSpecificStoreURL()
