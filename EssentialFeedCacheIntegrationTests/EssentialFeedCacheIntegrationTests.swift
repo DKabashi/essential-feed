@@ -24,7 +24,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         let sutToLoad = makeSUT()
         let items = [uniqueFeedItem()]
         
-        save(items, to: sutToInsert)
+        save(items, with: sutToInsert)
         
         expect(sutToLoad, toLoad: items)
     }
@@ -34,10 +34,10 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         let sutToInsertLatestItems = makeSUT()
         let sutToLoadLatestItems = makeSUT()
         
-        save([uniqueFeedItem()], to: sutToInsertFirstItems)
+        save([uniqueFeedItem()], with: sutToInsertFirstItems)
         
         let latestItems = [uniqueFeedItem(), uniqueFeedItem()]
-        save(latestItems, to: sutToInsertLatestItems)
+        save(latestItems, with: sutToInsertLatestItems)
         
         expect(sutToLoadLatestItems, toLoad: latestItems)
     }
@@ -67,9 +67,9 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         wait(for: [exp], timeout: 3.0)
     }
     
-    private func save(_ items: [FeedImage], to sut: LocalFeedLoader, file: StaticString = #filePath, line: UInt = #line) {
+    private func save(_ feed: [FeedImage], with loader: LocalFeedLoader, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Wait for insertion to finish")
-        sut.save(feed: items) { insertionError in
+        loader.save(feed: feed) { insertionError in
             XCTAssertNil(insertionError, file: file, line: line)
             exp.fulfill()
         }
