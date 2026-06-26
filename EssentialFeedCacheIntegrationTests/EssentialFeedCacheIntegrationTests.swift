@@ -24,12 +24,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         let sutToLoad = makeSUT()
         let items = [uniqueFeedItem()]
         
-        let exp1 = expectation(description: "Wait for insertion to finish")
-        sutToInsert.save(feed: items) { insertionError in
-            XCTAssertNil(insertionError)
-            exp1.fulfill()
-        }
-        wait(for: [exp1], timeout: 3.0)
+        save(items, to: sutToInsert)
         
         expect(sutToLoad, toLoad: .success(items))
     }
@@ -56,6 +51,15 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
             exp.fulfill()
         }
         
+        wait(for: [exp], timeout: 3.0)
+    }
+    
+    private func save(_ items: [FeedImage], to sut: LocalFeedLoader, file: StaticString = #filePath, line: UInt = #line) {
+        let exp = expectation(description: "Wait for insertion to finish")
+        sut.save(feed: items) { insertionError in
+            XCTAssertNil(insertionError, file: file, line: line)
+            exp.fulfill()
+        }
         wait(for: [exp], timeout: 3.0)
     }
     
