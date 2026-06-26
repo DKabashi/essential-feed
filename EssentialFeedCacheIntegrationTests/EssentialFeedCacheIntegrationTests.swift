@@ -16,7 +16,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
     func test_load_deliversEmptyOnEmptyCache() {
         let sut = makeSUT()
         
-        expect(sut, toLoad: .success([]))
+        expect(sut, toLoad: [])
     }
     
     func test_load_deliversInsertedItemsOnNonEmptyCache() {
@@ -26,7 +26,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         
         save(items, to: sutToInsert)
         
-        expect(sutToLoad, toLoad: .success(items))
+        expect(sutToLoad, toLoad: items)
     }
     
     func test_save_overridesItemsSavedOnASeparateInstance() {
@@ -39,7 +39,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         let latestItems = [uniqueFeedItem(), uniqueFeedItem()]
         save(latestItems, to: sutToInsertLatestItems)
         
-        expect(sutToLoadLatestItems, toLoad: .success(latestItems))
+        expect(sutToLoadLatestItems, toLoad: latestItems)
     }
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
@@ -52,14 +52,14 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         return sut
     }
     
-    private func expect(_ sut: LocalFeedLoader, toLoad expectedResult: LocalFeedLoader.LoadResult, file: StaticString = #filePath, line: UInt = #line) {
+    private func expect(_ sut: LocalFeedLoader, toLoad expectedItems: [FeedImage], file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "Wait for load to finish")
         sut.loadFeed { receivedResult in
-            switch (receivedResult, expectedResult) {
-            case (.success(let recievedItems), .success(let expectedItems)):
+            switch receivedResult {
+            case .success(let recievedItems):
                 XCTAssertEqual(recievedItems, expectedItems)
             default:
-                XCTFail("Expected result: \(expectedResult), but got \(receivedResult) instead", file: file, line: line)
+                XCTFail("Expected items: \(expectedItems), but got a different result: \(receivedResult) instead", file: file, line: line)
             }
             exp.fulfill()
         }
