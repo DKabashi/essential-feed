@@ -16,23 +16,12 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
     func test_load_deliversEmptyOnEmptyCache() {
         let sut = makeSUT()
         
-        let exp = expectation(description: "Wait for load to finish")
-        sut.loadFeed { result in
-            switch result {
-            case .success(let items):
-                XCTAssertTrue(items.isEmpty)
-            default:
-                XCTFail("Expected empty response but got \(result) instead")
-            }
-            exp.fulfill()
-        }
-        
-        wait(for: [exp], timeout: 3.0)
+        expect(sut, toLoad: .success([]))
     }
     
     func test_load_deliversInsertedItemsOnNonEmptyCache() {
         let sutToInsert = makeSUT()
-        let sutToDelete = makeSUT()
+        let sutToLoad = makeSUT()
         let items = [uniqueFeedItem()]
         
         let exp1 = expectation(description: "Wait for insertion to finish")
@@ -42,18 +31,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         }
         wait(for: [exp1], timeout: 3.0)
         
-        let exp2 = expectation(description: "Wait for load to finish")
-        sutToDelete.loadFeed { result in
-            switch result {
-            case .success(let receivedItems):
-                XCTAssertEqual(receivedItems, items)
-            default:
-                XCTFail("Expected items: \(items), but got \(result) instead")
-            }
-            exp2.fulfill()
-        }
-        
-        wait(for: [exp2], timeout: 3.0)
+        expect(sutToLoad, toLoad: .success(items))
     }
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
@@ -64,6 +42,21 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         checkForMemoryLeaks(for: sut, file: file, line: line)
         checkForMemoryLeaks(for: store, file: file, line: line)
         return sut
+    }
+    
+    private func expect(_ sut: LocalFeedLoader, toLoad expectedResult: LocalFeedLoader.LoadResult, file: StaticString = #filePath, line: UInt = #line) {
+        let exp = expectation(description: "Wait for load to finish")
+        sut.loadFeed { receivedResult in
+            switch (receivedResult, expectedResult) {
+            case (.success(let recievedItems), .success(let expectedItems)):
+                XCTAssertEqual(recievedItems, expectedItems)
+            default:
+                XCTFail("Expected result: \(expectedResult), but got \(receivedResult) instead", file: file, line: line)
+            }
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 3.0)
     }
     
     private func setupEmptyStoreState() {
