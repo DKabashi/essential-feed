@@ -105,9 +105,9 @@ final class CacheFeedUseCaseTests: XCTestCase {
         XCTAssertTrue(receivedErrors.isEmpty)
     }
     
-    func expect(_ sut: LocalFeedLoader, toCompleteWithError expectedError: NSError?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
+    func expect(_ sut: LocalFeedLoader, toCompleteWithError expectedError: Error?, when action: () -> Void, file: StaticString = #filePath, line: UInt = #line) {
         let expectation = XCTestExpectation(description: "Expect save to fail with error")
-        var capturedError: NSError?
+        var capturedError: Error?
         sut.save(feed: [uniqueFeedItem()]) { error in
             capturedError = error
             expectation.fulfill()
@@ -117,7 +117,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         
         wait(for: [expectation], timeout: 1.0)
         
-        XCTAssertEqual(capturedError, expectedError, file: file, line: line)
+        XCTAssertEqual(capturedError as? NSError, expectedError as? NSError, file: file, line: line)
     }
     
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {

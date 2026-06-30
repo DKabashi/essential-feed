@@ -13,12 +13,12 @@ public final class CoreDataFeedStore: FeedStore {
         perform { context in
             do {
                 if let cache = try ManagedCache.find(in: context) {
-                    completion(.success(cache.localFeed, cache.timestamp))
+                    completion(.success(.found(cache.localFeed, cache.timestamp)))
                 } else {
-                    completion(.empty)
+                    completion(.success(.empty))
                 }
             } catch {
-                completion(.failure(error as NSError))
+                completion(.failure(error))
             }
         }
     }
@@ -33,7 +33,7 @@ public final class CoreDataFeedStore: FeedStore {
                 try context.save()
                 completion(nil)
             } catch {
-                completion(error as NSError)
+                completion(error)
             }
         }
     }
@@ -44,7 +44,7 @@ public final class CoreDataFeedStore: FeedStore {
                 try ManagedCache.find(in: context).map(context.delete).map(context.save)
                 completion(nil)
             } catch {
-                completion(error as NSError)
+                completion(error)
             }
         }
     }

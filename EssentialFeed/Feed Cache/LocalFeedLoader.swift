@@ -12,7 +12,7 @@ public final class LocalFeedLoader {
 }
 
 extension LocalFeedLoader {
-    public typealias SaveResult = NSError?
+    public typealias SaveResult = Error?
     
     public func save(feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
         feedStore.deleteCachedFeed { [weak self] deletionError in
@@ -41,9 +41,9 @@ extension LocalFeedLoader: FeedLoader {
         feedStore.retrieve { [weak self] result in
             guard self != nil else { return }
             switch result {
-            case .success(let localFeedItems, _):
+            case .success(.found(let localFeedItems, _)):
                 completion(.success(localFeedItems.feedImages))
-            case .empty:
+            case .success(.empty):
                 completion(.success([]))
             case .failure(let error):
                 completion(.failure(error))
@@ -59,9 +59,9 @@ extension LocalFeedLoader {
             switch result {
             case .failure:
                 feedStore.deleteCachedFeed { _ in }
-            case .success(_, let timestamp) where FeedCachePolicy.isExpired(timestamp: timestamp, against: createTimestamp()):
+            case .success(.found(_, let timestamp)) where FeedCachePolicy.isExpired(timestamp: timestamp, against: createTimestamp()):
                 feedStore.deleteCachedFeed { _ in }
-            case .empty, .success:
+            case .success:
                 break
             }
         }
