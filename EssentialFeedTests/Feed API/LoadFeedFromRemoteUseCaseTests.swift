@@ -151,9 +151,9 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     
     private class NetworkClientSpy: HTTPClient {
         private(set) var urls: [URL] = []
-        private(set) var completions: [(HTTPClientResult) -> Void] = []
+        private(set) var completions: [(HTTPClient.Result) -> Void] = []
         
-        func get(from url: URL, completion: @escaping (HTTPClientResult) -> Void) {
+        func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
             self.urls.append(url)
             completions.append(completion)
         }
