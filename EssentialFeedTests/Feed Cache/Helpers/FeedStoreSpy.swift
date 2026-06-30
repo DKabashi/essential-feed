@@ -22,19 +22,19 @@ class FeedStoreSpy: FeedStore {
     }
     
     func completeCacheDeletion(with error: NSError) {
-        deletionCompletion?(error)
+        deletionCompletion?(.failure(error))
     }
     
     func completeCacheDeletionWithSuccess() {
-        deletionCompletion?(nil)
+        deletionCompletion?(.success(()))
     }
     
     func completeInsertion(with error: NSError) {
-        insertionCompletion?(error)
+        insertionCompletion?(.failure(error))
     }
     
     func completeCacheInsertionWithSuccess() {
-        insertionCompletion?(nil)
+        insertionCompletion?(.success(()))
     }
     
     func insert(_ items: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
