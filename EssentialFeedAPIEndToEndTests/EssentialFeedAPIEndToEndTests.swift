@@ -42,11 +42,11 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
         return feedLoader
     }
     
-    private func getFeedResult(with feedLoader: FeedLoader) -> LoadFeedResult? {
+    private func getFeedResult(with feedLoader: FeedLoader) -> FeedLoader.Result? {
         let expectation = XCTestExpectation(
             description: "Expect the remote feed loader to load items"
         )
-        var capturedResult: LoadFeedResult?
+        var capturedResult: FeedLoader.Result?
         
         feedLoader.loadFeed { result in
             capturedResult = result
