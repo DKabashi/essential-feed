@@ -32,16 +32,16 @@ final class FeedViewControllerTests: XCTestCase {
     func test_loadFeedActions_requestFeedLoadInOrder() {
         let (sut, loader) = makeSUT()
         
-        XCTAssertEqual(loader.loadCallCount, 0)
+        XCTAssertEqual(loader.loadCallCount, 0, "Expect no feed loading on VC init")
         
         sut.loadViewIfNeeded()
-        XCTAssertEqual(loader.loadCallCount, 1)
+        XCTAssertEqual(loader.loadCallCount, 1, "Expect the feed to load on viewDidLoad")
         
         sut.simulateUserInitiatedFeedLoad()
-        XCTAssertEqual(loader.loadCallCount, 2)
+        XCTAssertEqual(loader.loadCallCount, 2, "Expect the feed to load again after user initiates a feed load")
         
         sut.simulateUserInitiatedFeedLoad()
-        XCTAssertEqual(loader.loadCallCount, 3)
+        XCTAssertEqual(loader.loadCallCount, 3, "Expect the feed to load for the third time after another user initiates a feed load")
     }
     
     func test_viewDidLoad_showsLoadingIndicator() {
