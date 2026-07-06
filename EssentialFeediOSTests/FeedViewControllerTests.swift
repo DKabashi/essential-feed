@@ -15,7 +15,11 @@ class FeedViewController: UITableViewController {
         
         refreshControl = UIRefreshControl()
         refreshControl?.addTarget(self, action: #selector(load), for: .valueChanged)
-
+    }
+    
+    override func viewIsAppearing(_ animated: Bool) {
+        super.viewIsAppearing(animated)
+        
         load()
     }
     
@@ -36,6 +40,8 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.loadCallCount, 0, "Expect no feed loading on VC init")
         
         sut.loadViewIfNeeded()
+        sut.beginAppearanceTransition(true, animated: false)
+        sut.endAppearanceTransition()
         XCTAssertEqual(loader.loadCallCount, 1, "Expect the feed to load on viewDidLoad")
         
         sut.simulateUserInitiatedFeedLoad()
@@ -50,13 +56,16 @@ final class FeedViewControllerTests: XCTestCase {
         let (sut, loader) = makeSUT()
 
         sut.loadViewIfNeeded()
-//        XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show after on viewDidLoad")
+        sut.replaceRefreshControlWithFake()
+        sut.beginAppearanceTransition(true, animated: false)
+        sut.endAppearanceTransition()
+        XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show after on viewDidLoad")
 
         loader.completeFeedLoading(at: 0)
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide after the feed load is finished")
   
         sut.simulateUserInitiatedFeedLoad()
-  //      XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show again after on user initiated feed load")
+        XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show again after on user initiated feed load")
         
         loader.completeFeedLoading(at: 1)
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide again after the user initiated feed load is finished")
@@ -98,6 +107,34 @@ private extension FeedViewController {
     
     var isShowingRefreshIndicator: Bool {
         refreshControl?.isRefreshing == true
+    }
+    
+    func replaceRefreshControlWithFake() {
+        let fake = FakeRefreshControl()
+        
+        refreshControl?.allTargets.forEach { target in
+            refreshControl?.actions(forTarget: target, forControlEvent: .valueChanged)?.forEach { action in
+                fake.addTarget(target, action: Selector(action), for: .valueChanged)
+            }
+        }
+        
+        refreshControl = fake
+    }
+}
+
+private class FakeRefreshControl: UIRefreshControl {
+    private var _isRefreshing: Bool = false
+    
+    override var isRefreshing: Bool {
+        return _isRefreshing
+    }
+    
+    override func beginRefreshing() {
+        _isRefreshing = true
+    }
+    
+    override func endRefreshing() {
+        _isRefreshing = false
     }
 }
 
