@@ -19,22 +19,32 @@ class FeedViewController: UIViewController {
 final class FeedViewControllerTests: XCTestCase {
 
     func test_init_doesNotLoadFeed() {
-        let loader = LoaderSpy()
-        _ = FeedViewController(loader: loader)
+        let (_, loader) = makeSUT()
         
         XCTAssertEqual(loader.loadCallCount, 0)
     }
     
     func test_viewDidLoad_loadsFeed() {
-        let loader = LoaderSpy()
-        let sut = FeedViewController(loader: loader)
+        let (sut, loader) = makeSUT()
         
         sut.loadViewIfNeeded()
         
         XCTAssertEqual(loader.loadCallCount, 1)
     }
     
-    class LoaderSpy: FeedLoader {
+    // MARK: - Helpers
+    
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
+        let loader = FeedLoaderSpy()
+        let sut = FeedViewController(loader: loader)
+        
+        checkForMemoryLeaks(for: loader, file: file, line: line)
+        checkForMemoryLeaks(for: sut, file: file, line: line)
+        
+        return (sut: sut, loader: loader)
+    }
+    
+    class FeedLoaderSpy: FeedLoader {
         private(set) var loadCallCount = 0
         
         func loadFeed(completion: @escaping (FeedLoader.Result) -> Void) {
