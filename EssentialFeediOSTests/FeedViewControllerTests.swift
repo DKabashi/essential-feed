@@ -22,7 +22,6 @@ final class FeedViewControllerTests: XCTestCase {
     }
     
     func test_refreshIndicator_changesVisibilityBasedOnIsFeedLoading() {
-        // TODO: Fix the 2 breaking changes for ios 17+
         let (sut, loader) = makeSUT()
 
         sut.loadViewIfNeeded()
@@ -39,6 +38,10 @@ final class FeedViewControllerTests: XCTestCase {
         
         loader.completeFeedLoading(at: 1)
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide again after the user initiated feed load is finished")
+        
+        sut.beginAppearanceTransition(true, animated: false)
+        sut.endAppearanceTransition()
+        XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to not be visible the rest of the times viewIsAppearing is called")
     }
     
     // MARK: - Helpers

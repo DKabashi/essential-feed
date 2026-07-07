@@ -3,6 +3,7 @@ import EssentialFeed
 
 public class FeedViewController: UITableViewController {
     private var loader: FeedLoader?
+    private var isViewIsAppearingCalled = false
 
     public convenience init(loader: FeedLoader) {
         self.init()
@@ -19,7 +20,10 @@ public class FeedViewController: UITableViewController {
     public override func viewIsAppearing(_ animated: Bool) {
         super.viewIsAppearing(animated)
         
-        load()
+        if !isViewIsAppearingCalled {
+            load()
+            isViewIsAppearingCalled = true
+        }
     }
     
     @objc private func load() {
