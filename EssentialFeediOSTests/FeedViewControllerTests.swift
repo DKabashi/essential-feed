@@ -9,9 +9,7 @@ final class FeedViewControllerTests: XCTestCase {
         
         XCTAssertEqual(loader.loadCallCount, 0, "Expect no feed loading on VC init")
         
-        sut.loadViewIfNeeded()
-        sut.beginAppearanceTransition(true, animated: false)
-        sut.endAppearanceTransition()
+        sut.simulateViewAppearance()
         XCTAssertEqual(loader.loadCallCount, 1, "Expect the feed to load on viewDidLoad")
         
         sut.simulateUserInitiatedFeedLoad()
@@ -24,10 +22,7 @@ final class FeedViewControllerTests: XCTestCase {
     func test_refreshIndicator_changesVisibilityBasedOnIsFeedLoading() {
         let (sut, loader) = makeSUT()
 
-        sut.loadViewIfNeeded()
-        sut.replaceRefreshControlWithFake()
-        sut.beginAppearanceTransition(true, animated: false)
-        sut.endAppearanceTransition()
+        sut.simulateViewAppearance()
         XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show after on viewDidLoad")
 
         loader.completeFeedLoading(at: 0)
@@ -39,8 +34,7 @@ final class FeedViewControllerTests: XCTestCase {
         loader.completeFeedLoading(at: 1)
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide again after the user initiated feed load is finished")
         
-        sut.beginAppearanceTransition(true, animated: false)
-        sut.endAppearanceTransition()
+        sut.simulateViewAppearance()
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to not be visible the rest of the times viewIsAppearing is called")
     }
     
@@ -80,6 +74,16 @@ private extension FeedViewController {
     
     var isShowingRefreshIndicator: Bool {
         refreshControl?.isRefreshing == true
+    }
+    
+    func simulateViewAppearance() {
+        if !isViewLoaded {
+            loadViewIfNeeded()
+            replaceRefreshControlWithFake()
+        }
+        
+        beginAppearanceTransition(true, animated: false)
+        endAppearanceTransition()
     }
     
     func replaceRefreshControlWithFake() {
