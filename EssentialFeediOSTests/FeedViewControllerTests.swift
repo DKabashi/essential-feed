@@ -23,7 +23,7 @@ final class FeedViewControllerTests: XCTestCase {
         let (sut, loader) = makeSUT()
 
         sut.simulateViewAppearance()
-        XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show after on viewDidLoad")
+        XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show after on viewIsAppearing")
 
         loader.completeFeedLoading(at: 0)
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide after the feed load is finished")
@@ -31,8 +31,8 @@ final class FeedViewControllerTests: XCTestCase {
         sut.simulateUserInitiatedFeedLoad()
         XCTAssertTrue(sut.isShowingRefreshIndicator, "Expect loading indicator to show again after on user initiated feed load")
         
-        loader.completeFeedLoading(at: 1)
-        XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide again after the user initiated feed load is finished")
+        loader.completeFeedLoadingWithError(at: 1)
+        XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to hide after the user initiated feed load is finished with error")
         
         sut.simulateViewAppearance()
         XCTAssertFalse(sut.isShowingRefreshIndicator, "Expect loading indicator to not be visible the rest of the times viewIsAppearing is called")
