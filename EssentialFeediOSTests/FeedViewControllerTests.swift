@@ -123,6 +123,28 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(imageView1?.isViewShimmering, false, "Expect the second image view to stop shimmering when the image data is loaded with failure")
     }
     
+    func test_feedImageView_rendersImageLoadedFromURL() {
+        let (sut, loader) = makeSUT()
+        
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(), uniqueFeedImage()], at: 0)
+        
+        let imageView0 = sut.simulateFeedImageViewVisible(at: 0)
+        let imageView1 = sut.simulateFeedImageViewVisible(at: 1)
+        XCTAssertEqual(imageView0?.renderedImage, .none, "Expect no rendered image in the first image view until the image is loaded from url")
+        XCTAssertEqual(imageView1?.renderedImage, .none, "Expect no rendered image in the second image view until the image is loaded from url")
+
+        let imageData0 = UIImage.make(withColor: .red).pngData()
+        loader.completeImageDataLoadingWithSuccess(with: imageData0, at: 0)
+        XCTAssertEqual(imageView0?.renderedImage, imageData0, "Expect the first image to render after loading it")
+        XCTAssertEqual(imageView1?.renderedImage, .none, "Expect the second image view to have no image until its loaded")
+  
+        let imageData1 = UIImage.make(withColor: .blue).pngData()
+        loader.completeImageDataLoadingWithSuccess(with: imageData1, at: 1)
+        XCTAssertEqual(imageView0?.renderedImage, imageData0, "Expect the first image to render after loading it")
+        XCTAssertEqual(imageView1?.renderedImage, imageData1, "Expect the second image to render after loading it")
+    }
+    
     // MARK: - Helpers
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
@@ -209,8 +231,8 @@ final class FeedViewControllerTests: XCTestCase {
             }
         }
         
-        func completeImageDataLoadingWithSuccess(at index: Int) {
-            loadImageRequests[index].completion(.success(anyData()))
+        func completeImageDataLoadingWithSuccess(with data: Data? = nil, at index: Int) {
+            loadImageRequests[index].completion(.success(data ?? anyData()))
         }
         
         func completeImageDataLoadingWithFailure(at index: Int) {
@@ -263,6 +285,10 @@ private extension FeedImageCell {
     
     var isViewShimmering: Bool {
         imageContainer.isShimmering
+    }
+    
+    var renderedImage: Data? {
+        feedImageView.image?.pngData()
     }
 }
 
@@ -320,6 +346,19 @@ private extension UIRefreshControl {
             actions(forTarget: target, forControlEvent: .valueChanged)?.forEach {
                 (target as NSObject).perform(Selector($0))
             }
+        }
+    }
+}
+
+private extension UIImage {
+    static func make(withColor color: UIColor) -> UIImage {
+        let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        
+        return UIGraphicsImageRenderer(size: rect.size, format: format).image { rendererContext in
+            color.setFill()
+            rendererContext.fill(rect)
         }
     }
 }
