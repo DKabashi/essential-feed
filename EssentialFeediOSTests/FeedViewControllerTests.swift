@@ -40,10 +40,10 @@ final class FeedViewControllerTests: XCTestCase {
     
     func test_loadFeedCompletion_rendersSuccessfullyLoadedImages() {
         let (sut, loader) = makeSUT()
-        let item0 = uniquFeedImage(description: "Desc", location: "Loc")
-        let item1 = uniquFeedImage(description: nil, location: nil)
-        let item2 = uniquFeedImage(description: "Desc", location: nil)
-        let item3 = uniquFeedImage(description: nil, location: "Loc")
+        let item0 = uniqueFeedImage(description: "Desc", location: "Loc")
+        let item1 = uniqueFeedImage(description: nil, location: nil)
+        let item2 = uniqueFeedImage(description: "Desc", location: nil)
+        let item3 = uniqueFeedImage(description: nil, location: "Loc")
         let itemsList = [item0, item1, item2, item3]
 
         assertThat(sut, isRendering: [])
@@ -55,6 +55,19 @@ final class FeedViewControllerTests: XCTestCase {
         sut.simulateUserInitiatedFeedLoad()
         loader.completeFeedLoading(with: itemsList, at: 1)
         assertThat(sut, isRendering: itemsList)
+    }
+    
+    func test_loadFeedCompletion_doesNotAlterCurrentRenderedStateOnError() {
+        let (sut, loader) = makeSUT()
+        let item = uniqueFeedImage()
+        
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [item], at: 0)
+        
+        sut.simulateUserInitiatedFeedLoad()
+        loader.completeFeedLoadingWithError(at: 1)
+        
+        assertThat(sut, isRendering: [item])
     }
     
     // MARK: - Helpers
@@ -92,7 +105,7 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(feedImageCell.locationText, item.location, "Expected cell location to be \(String(describing: item.location)), but got \(String(describing: feedImageCell.locationText)) instead", file: file, line: line)
     }
     
-    private func uniquFeedImage(description: String? = nil, location: String? = nil) -> FeedImage {
+    private func uniqueFeedImage(description: String? = nil, location: String? = nil) -> FeedImage {
         return FeedImage(id: UUID(), description: description, location: location, url: URL(string: "http://any-url.com")!)
     }
     
@@ -109,6 +122,10 @@ final class FeedViewControllerTests: XCTestCase {
         
         func completeFeedLoading(with images: [FeedImage] = [], at index: Int) {
             completions[index](.success(images))
+        }
+        
+        func completeFeedLoadingWithError(at index: Int) {
+            completions[index](.failure(anyNSError()))
         }
     }
 }
