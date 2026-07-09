@@ -77,13 +77,13 @@ final class FeedViewControllerTests: XCTestCase {
         
         sut.simulateViewAppearance()
         loader.completeFeedLoading(with: [item0, item1], at: 0)
-        XCTAssertEqual(loader.loadedImages, [], "Expected no image url request until views become visible")
+        XCTAssertEqual(loader.loadedImageRequestURLs, [], "Expected no image url request until views become visible")
         
         sut.simulateFeedImageViewVisible(at: 0)
-        XCTAssertEqual(loader.loadedImages, [item0.url], "Expected first image url request once the first view becomes visible")
+        XCTAssertEqual(loader.loadedImageRequestURLs, [item0.url], "Expected first image url request once the first view becomes visible")
         
         sut.simulateFeedImageViewVisible(at: 1)
-        XCTAssertEqual(loader.loadedImages, [item0.url, item1.url], "Expected second image url request once the second view becomes visible")
+        XCTAssertEqual(loader.loadedImageRequestURLs, [item0.url, item1.url], "Expected second image url request once the second view becomes visible")
     }
     
     func test_feedImageView_cancelsImageURLLoadingWhenViewDissapears() {
@@ -180,6 +180,27 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(imageView?.isRetryButtonVisible, true)
     }
     
+    func test_feedImageRetryAction_retriesImageLoad() {
+        let (sut, loader) = makeSUT()
+        let url0 = URL(string: "http://url-0.com")!
+        let url1 = URL(string: "http://url-1.com")!
+        
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(url: url0), uniqueFeedImage(url: url1)], at: 0)
+        let imageView0 = sut.simulateFeedImageViewVisible(at: 0)!
+        let imageView1 = sut.simulateFeedImageViewVisible(at: 1)!
+        
+        loader.completeImageDataLoadingWithFailure(at: 0)
+        loader.completeImageDataLoadingWithFailure(at: 1)
+        XCTAssertEqual(loader.loadedImageRequestURLs, [url0, url1])
+        
+        imageView0.simulateRetryButtonTap()
+        XCTAssertEqual(loader.loadedImageRequestURLs, [url0, url1, url0])
+        
+        imageView1.simulateRetryButtonTap()
+        XCTAssertEqual(loader.loadedImageRequestURLs, [url0, url1, url0, url1])
+    }
+    
     // MARK: - Helpers
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
@@ -246,7 +267,7 @@ final class FeedViewControllerTests: XCTestCase {
         private(set) var loadImageRequests = [(url: URL, completion: LoadImageCompletion)]()
         private(set) var cancelledImageURLs = [URL]()
         
-        var loadedImages: [URL] {
+        var loadedImageRequestURLs: [URL] {
             return loadImageRequests.map { $0.url }
         }
         
@@ -329,6 +350,10 @@ private extension FeedImageCell {
     var isRetryButtonVisible: Bool {
         !feedImageRetryButton.isHidden
     }
+    
+    func simulateRetryButtonTap() {
+        feedImageRetryButton.simulateRetryButtonTap()
+    }
 }
 
 private extension FeedViewController {
@@ -383,6 +408,16 @@ private extension UIRefreshControl {
     func simulatePullToRefresh() {
         allTargets.forEach { target in
             actions(forTarget: target, forControlEvent: .valueChanged)?.forEach {
+                (target as NSObject).perform(Selector($0))
+            }
+        }
+    }
+}
+
+private extension UIButton {
+    func simulateRetryButtonTap() {
+        allTargets.forEach { target in
+            actions(forTarget: target, forControlEvent: .touchUpInside)?.forEach {
                 (target as NSObject).perform(Selector($0))
             }
         }
