@@ -217,6 +217,22 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.loadedImageRequestURLs, [url0, url1])
     }
     
+    func test_feedImageView_cancelsPreloadImageURLWhenNoLongerNearVisible() {
+        let (sut, loader) = makeSUT()
+        let url0 = URL(string: "http://url-0.com")!
+        let url1 = URL(string: "http://url-1.com")!
+    
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(url: url0), uniqueFeedImage(url: url1)], at: 0)
+        XCTAssertEqual(loader.cancelledImageURLs, [])
+        
+        sut.simulateFeedImageNotNearVisibleAnymore(at: 0)
+        XCTAssertEqual(loader.cancelledImageURLs, [url0])
+        
+        sut.simulateFeedImageNotNearVisibleAnymore(at: 1)
+        XCTAssertEqual(loader.cancelledImageURLs, [url0, url1])
+    }
+    
     // MARK: - Helpers
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
@@ -345,6 +361,13 @@ private extension FeedViewController {
         let ds = tableView.prefetchDataSource
         let indexPath = IndexPath(item: index, section: imageFeedSection)
         ds?.tableView(tableView, prefetchRowsAt: [indexPath])
+    }
+    
+    func simulateFeedImageNotNearVisibleAnymore(at index: Int) {
+        simulateFeedImageViewNearVisible(at: index)
+        let ds = tableView.prefetchDataSource
+        let indexPath = IndexPath(item: index, section: imageFeedSection)
+        ds?.tableView?(tableView, cancelPrefetchingForRowsAt: [indexPath])
     }
 }
 
