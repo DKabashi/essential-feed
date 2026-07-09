@@ -201,6 +201,22 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.loadedImageRequestURLs, [url0, url1, url0, url1])
     }
     
+    func test_feedImageView_preloadsImageURLWhenNearVisible() {
+        let (sut, loader) = makeSUT()
+        let url0 = URL(string: "http://url-0.com")!
+        let url1 = URL(string: "http://url-1.com")!
+    
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(url: url0), uniqueFeedImage(url: url1)], at: 0)
+        XCTAssertEqual(loader.loadedImageRequestURLs, [])
+        
+        sut.simulateFeedImageViewNearVisible(at: 0)
+        XCTAssertEqual(loader.loadedImageRequestURLs, [url0])
+        
+        sut.simulateFeedImageViewNearVisible(at: 1)
+        XCTAssertEqual(loader.loadedImageRequestURLs, [url0, url1])
+    }
+    
     // MARK: - Helpers
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
@@ -323,6 +339,12 @@ private extension FeedViewController {
         let delegate = tableView.delegate
         let indexPath = IndexPath(item: index, section: imageFeedSection)
         delegate?.tableView?(tableView, didEndDisplaying: visibleImageView!, forRowAt: indexPath)
+    }
+    
+    func simulateFeedImageViewNearVisible(at index: Int) {
+        let ds = tableView.prefetchDataSource
+        let indexPath = IndexPath(item: index, section: imageFeedSection)
+        ds?.tableView(tableView, prefetchRowsAt: [indexPath])
     }
 }
 
