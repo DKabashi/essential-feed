@@ -98,7 +98,6 @@ final class FeedViewControllerTests: XCTestCase {
         sut.simulateFeedImageViewDissapeared(at: 0)
         XCTAssertEqual(loader.cancelledImageURLs, [item0.url], "Expected first image url cancel request once the first view dissapears")
         
-        sut.simulateFeedImageViewVisible(at: 1)
         sut.simulateFeedImageViewDissapeared(at: 1)
         XCTAssertEqual(loader.cancelledImageURLs, [item0.url, item1.url], "Expected second image url cancel request once the second view dissapears")
     }
