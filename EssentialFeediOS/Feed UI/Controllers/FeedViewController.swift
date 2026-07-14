@@ -1,7 +1,7 @@
 import UIKit
 import EssentialFeed
 
-public class FeedViewController: UITableViewController {
+public final class FeedViewController: UITableViewController {
     private var imageLoader: FeedImageDataLoader?
     private var isViewIsAppearingCalled = false
     private var tableModel = [FeedImage]() {
