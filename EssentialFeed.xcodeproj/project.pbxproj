@@ -211,13 +211,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		81B8D9A82FFBAF28005BB119 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		81B9E7292F3B7741000F5E57 = {
 			isa = PBXGroup;
 			children = (
@@ -233,7 +226,6 @@
 				811A6DF32FD72A4B00FEB69B /* EssentialFeed.xctestplan */,
 				81B8D9492FF51D38005BB119 /* EssentialFeediOS.xctestplan */,
 				817185402FED411000647F0F /* CacheIntegrationTests.xctestplan */,
-				81B8D9A82FFBAF28005BB119 /* Frameworks */,
 				81B9E7342F3B7742000F5E57 /* Products */,
 			);
 			sourceTree = "<group>";
