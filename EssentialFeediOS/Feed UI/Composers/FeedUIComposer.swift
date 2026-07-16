@@ -5,9 +5,10 @@ public final class FeedUIComposer {
     private init() {}
     
     public static func composeWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let refreshController = FeedRefreshViewController(feedLoader: feedLoader)
+        let feedViewModel = FeedViewModel(feedLoader: feedLoader)
+        let refreshController = FeedRefreshViewController(viewModel: feedViewModel)
         let feedViewController = FeedViewController(refreshController: refreshController)
-        refreshController.onRefresh = adaptFeedToImageController(forwardingTo: feedViewController, loader: imageLoader)
+        feedViewModel.onFeedLoad = adaptFeedToImageController(forwardingTo: feedViewController, loader: imageLoader)
         return feedViewController
     }
     
