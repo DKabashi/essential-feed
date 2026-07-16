@@ -5,7 +5,6 @@ public final class FeedUIComposer {
     private init() {}
     
     public static func composeWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        //let feedViewModel = FeedViewModel(feedLoader: feedLoader)
         let feedPresenter = FeedPresenter(feedLoader: feedLoader)
         
         let refreshController = FeedRefreshViewController(presenter: feedPresenter)
