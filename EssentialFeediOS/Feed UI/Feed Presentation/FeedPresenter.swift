@@ -18,19 +18,24 @@ protocol FeedLoadingView {
 }
 
 final class FeedPresenter {
-    var feedView: FeedView?
-    var feedLoadingView: FeedLoadingView?
+    private let feedView: FeedView
+    private let feedLoadingView: FeedLoadingView
+
+    init(feedView: FeedView, feedLoadingView: FeedLoadingView) {
+        self.feedView = feedView
+        self.feedLoadingView = feedLoadingView
+    }
 
     func didStartLoadingFeed() {
-        feedLoadingView?.display(FeedLoadingViewModel(isLoading: true))
+        feedLoadingView.display(FeedLoadingViewModel(isLoading: true))
     }
 
     func didFinishLoadingFeed(with feed: [FeedImage]) {
-        feedView?.display(FeedViewModel(feed: feed))
-        feedLoadingView?.display(FeedLoadingViewModel(isLoading: false))
+        feedView.display(FeedViewModel(feed: feed))
+        feedLoadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 
     func didFinishLoadingFeed(with error: Error) {
-        feedLoadingView?.display(FeedLoadingViewModel(isLoading: false))
+        feedLoadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 }
