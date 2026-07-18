@@ -1,48 +1,44 @@
 import UIKit
 
-final class FeedImageController {
-    private let viewModel: FeedImageViewModel<UIImage>
+protocol FeedImageControllerDelegate {
+    func didRequestImage()
+    func didCancelImageRequest()
+}
 
-    init(viewModel: FeedImageViewModel<UIImage>) {
-        self.viewModel = viewModel
+final class FeedImageController: FeedImageView {
+    private let delegate: FeedImageControllerDelegate
+    private lazy var cell = FeedImageCell()
+
+    init(delegate: FeedImageControllerDelegate) {
+        self.delegate = delegate
     }
     
     func view() -> UITableViewCell {
-        let view = binded(FeedImageCell())
-        viewModel.loadImageData()
-        return view
+        delegate.didRequestImage()
+        return cell
     }
     
     func prefetch() {
-        viewModel.loadImageData()
+        delegate.didRequestImage()
     }
     
     func cancelTask() {
-        viewModel.cancelImageDataLoad()
+        delegate.didCancelImageRequest()
     }
     
-    private func binded(_ view: FeedImageCell) -> FeedImageCell {
-        view.locationLabel.isHidden = !viewModel.hasLocation
-        view.locationLabel.text = viewModel.location
-        view.descriptionLabel.text = viewModel.description
-        view.onRetry = viewModel.loadImageData
+    func display(_ model: FeedImageViewModel<UIImage>) {
+        cell.locationLabel.isHidden = !model.hasLocation
+        cell.locationLabel.text = model.location
+        cell.descriptionLabel.text = model.description
+        cell.onRetry = delegate.didRequestImage
         
-        viewModel.onImageLoad = { [weak view] image in
-            view?.feedImageView.image = image
+        cell.feedImageView.image = model.image
+        cell.feedImageRetryButton.isHidden = !model.shouldRetry
+        
+        if model.isLoading {
+            cell.imageContainer.startShimmering()
+        } else {
+            cell.imageContainer.stopShimmering()
         }
-        
-        viewModel.onImageLoadingStateChange = { [weak view] isLoading in
-            if isLoading {
-                view?.imageContainer.startShimmering()
-            } else {
-                view?.imageContainer.stopShimmering()
-            }
-        }
-        
-        viewModel.onShouldRetryImageLoadStateChange = { [weak view] shouldRetry in
-            view?.feedImageRetryButton.isHidden = !shouldRetry
-        }
-        
-        return view
     }
 }
