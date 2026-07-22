@@ -21,7 +21,7 @@ public final class FeedViewController: UITableViewController {
     
     private func setupTableView() {
         tableView.prefetchDataSource = self
-        //tableView.register(FeedCellView.self, forCellReuseIdentifier: "\(FeedCellView.self)")
+        tableView.register(FeedImageCell.self, forCellReuseIdentifier: "\(FeedImageCell.self)")
         tableView.separatorStyle = .none
         tableView.allowsSelection = false
     }
@@ -44,11 +44,11 @@ public final class FeedViewController: UITableViewController {
     }
     
     public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return tableModel[indexPath.row].view()
+        return tableModel[indexPath.row].view(in: tableView)
     }
     
     public override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        _ = tableModel[indexPath.row].view()
+        _ = tableModel[indexPath.row].view(in: tableView)
     }
     
     public override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {

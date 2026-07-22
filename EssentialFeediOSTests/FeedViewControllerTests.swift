@@ -232,6 +232,16 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.cancelledImageURLs, [url0, url1])
     }
     
+    func test_feedImageView_doesNotRenderLoadedImageAfterCellNotVisibleAnymore() {
+        let (sut, loader) = makeSUT()
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(url: anyURL())], at: 0)
+        
+        let view = sut.simulateFeedImageViewDissapeared(at: 0)
+        loader.completeImageDataLoadingWithSuccess(with: anyImageData(), at: 0)
+        XCTAssertNil(view?.renderedImage)
+    }
+    
     // MARK: - Helpers
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
@@ -269,5 +279,9 @@ final class FeedViewControllerTests: XCTestCase {
     
     private func uniqueFeedImage(url: URL = URL(string: "http://any-url.com")!, description: String? = nil, location: String? = nil) -> FeedImage {
         return FeedImage(id: UUID(), description: description, location: location, url: url)
+    }
+    
+    private func anyImageData() -> Data {
+        return UIImage.make(withColor: .blue).pngData()!
     }
 }

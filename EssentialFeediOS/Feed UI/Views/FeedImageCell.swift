@@ -5,6 +5,7 @@ public class FeedImageCell: UITableViewCell {
     public let descriptionLabel = UILabel()
     public let imageContainer = UIView()
     public let feedImageView = UIImageView()
+
     private let locationIconImageView = UIImageView()
     private let locationStackView = UIStackView()
     private let containerStackView = UIStackView()
