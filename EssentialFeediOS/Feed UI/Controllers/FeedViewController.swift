@@ -15,7 +15,18 @@ public final class FeedViewController: UITableViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        setupTableView()
+        setupRefreshControl()
+    }
+    
+    private func setupTableView() {
         tableView.prefetchDataSource = self
+        //tableView.register(FeedCellView.self, forCellReuseIdentifier: "\(FeedCellView.self)")
+        tableView.separatorStyle = .none
+        tableView.allowsSelection = false
+    }
+    
+    private func setupRefreshControl() {
         refreshControl = refreshController?.view
     }
     
