@@ -31,8 +31,8 @@ class FeedCellView: UITableViewCell {
         containerStackView.translatesAutoresizingMaskIntoConstraints = false
         containerStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10).isActive = true
         containerStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10).isActive = true
-        containerStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
-        containerStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+        containerStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10).isActive = true
+        containerStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10).isActive = true
         containerStackView.axis = .vertical
         containerStackView.spacing = 10
         containerStackView.isLayoutMarginsRelativeArrangement = true
@@ -63,8 +63,10 @@ class FeedCellView: UITableViewCell {
         containerStackView.addArrangedSubview(feedImageView)
         feedImageView.image = UIImage(named: "dummy-image")
         feedImageView.contentMode = .scaleAspectFill
+        feedImageView.layer.cornerRadius = 22
+        feedImageView.clipsToBounds = true
         feedImageView.widthAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
-        feedImageView.heightAnchor.constraint(equalToConstant: 300).isActive = true
+        feedImageView.heightAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
     }
     
     private func setupDescriptionLabel() {
