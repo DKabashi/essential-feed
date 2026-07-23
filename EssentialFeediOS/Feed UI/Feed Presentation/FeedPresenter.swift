@@ -27,7 +27,7 @@ final class FeedPresenter {
     }
     
     static var title: String {
-        return "My Feed"
+        return String(localized: LocalizedStringResource.Feed.feedViewTitle)
     }
 
     func didStartLoadingFeed() {

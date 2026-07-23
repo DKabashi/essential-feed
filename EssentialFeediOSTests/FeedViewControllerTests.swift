@@ -9,7 +9,12 @@ final class FeedViewControllerTests: XCTestCase {
         
         sut.simulateViewAppearance()
         
-        XCTAssertEqual(sut.title, "My Feed")
+        let bundle = Bundle(for: FeedViewController.self)
+        let titleKey = "FEED_VIEW_TITLE"
+        let localizedTitle = bundle.localizedString(forKey: titleKey, value: nil, table: "Feed")
+        
+        XCTAssertNotEqual(localizedTitle, titleKey, "Expected a value for key \(titleKey), but got the key instead")
+        XCTAssertEqual(sut.title, localizedTitle)
     }
     
     func test_loadFeedActions_requestFeedLoadInOrder() {
