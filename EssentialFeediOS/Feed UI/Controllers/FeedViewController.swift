@@ -15,15 +15,10 @@ public final class FeedViewController: UITableViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setupView()
         setupTableView()
         setupRefreshControl()
     }
-    
-    private func setupView() {
-        title = FeedPresenter.title
-    }
-    
+
     private func setupTableView() {
         tableView.prefetchDataSource = self
         tableView.register(FeedImageCell.self, forCellReuseIdentifier: "\(FeedImageCell.self)")

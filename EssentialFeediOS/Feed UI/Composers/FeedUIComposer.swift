@@ -8,6 +8,7 @@ public final class FeedUIComposer {
         let presenterAdapter = FeedLoadPresentationAdapter(feedLoader: feedLoader)
         let refreshController = FeedRefreshViewController(delegate: presenterAdapter)
         let feedViewController = FeedViewController(refreshController: refreshController)
+        feedViewController.title = FeedPresenter.title
 
         presenterAdapter.presenter = FeedPresenter(
             feedView: FeedViewAdapter(controller: feedViewController, loader: imageLoader),
