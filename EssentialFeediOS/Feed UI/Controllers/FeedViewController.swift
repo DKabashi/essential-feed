@@ -15,8 +15,13 @@ public final class FeedViewController: UITableViewController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        setupView()
         setupTableView()
         setupRefreshControl()
+    }
+    
+    private func setupView() {
+        title = "My Feed"
     }
     
     private func setupTableView() {
