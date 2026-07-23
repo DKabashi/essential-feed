@@ -242,19 +242,36 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertNil(view?.renderedImage)
     }
     
-    func test_feedImageView_doesNotRenderImageOfPreviousCellThatNeverBecameVisible() {
+    func test_feedImageView_doesNotRenderImageOfPreviousCellThatNeverBecameVisible() throws {
         let (sut, loader) = makeSUT()
                 
         sut.simulateViewAppearance()
         loader.completeFeedLoading(with: [uniqueFeedImage(url: anyURL()), uniqueFeedImage(url: anyURL())], at: 0)
         
-        let view0 = try! XCTUnwrap(sut.simulateFeedImageViewVisible(at: 0))
+        let view0 = try XCTUnwrap(sut.simulateFeedImageViewVisible(at: 0))
         view0.prepareForReuse()
         
         let imageData0 = UIImage.make(withColor: .red).pngData()!
         loader.completeImageDataLoadingWithSuccess(with: imageData0, at: 0)
         
         XCTAssertEqual(view0.renderedImage, .none, "Expected no image state change for reused view once image loading completes successfully")
+    }
+    
+    func test_feedImageView_showsDataForNewViewRequestAfterPreviousViewIsReused() throws {
+        let (sut, loader) = makeSUT()
+        
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(url: anyURL()), uniqueFeedImage(url: anyURL())], at: 0)
+        
+        let previousView = try XCTUnwrap(sut.simulateFeedImageViewDissapeared(at: 0))
+        
+        let newView = try XCTUnwrap(sut.simulateFeedImageViewVisible(at: 0))
+        previousView.prepareForReuse()
+        
+        let imageData = UIImage.make(withColor: .red).pngData()!
+        loader.completeImageDataLoadingWithSuccess(with: imageData, at: 1)
+        
+        XCTAssertEqual(newView.renderedImage, imageData)
     }
     
     // MARK: - Helpers
