@@ -21,7 +21,7 @@ public final class FeedViewController: UITableViewController {
     }
     
     private func setupView() {
-        title = "My Feed"
+        title = FeedPresenter.title
     }
     
     private func setupTableView() {
