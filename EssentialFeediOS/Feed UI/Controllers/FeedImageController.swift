@@ -24,7 +24,7 @@ final class FeedImageController: FeedImageView {
     }
     
     func cancelTask() {
-        cell = nil
+        releaseCellForReuse()
         delegate.didCancelImageRequest()
     }
     
@@ -32,7 +32,13 @@ final class FeedImageController: FeedImageView {
         cell?.locationLabel.isHidden = !model.hasLocation
         cell?.locationLabel.text = model.location
         cell?.descriptionLabel.text = model.description
-        cell?.onRetry = delegate.didRequestImage
+        cell?.onRetry = { [weak self] in
+            self?.delegate.didRequestImage()
+        }
+        
+        cell?.onReuse = { [weak self] in
+            self?.releaseCellForReuse()
+        }
         
         cell?.feedImageView.setImageWithFadeAnimation(model.image)
         cell?.feedImageRetryButton.isHidden = !model.shouldRetry
@@ -42,5 +48,9 @@ final class FeedImageController: FeedImageView {
         } else {
             cell?.imageContainer.stopShimmering()
         }
+    }
+    
+    private func releaseCellForReuse() {
+        cell = nil
     }
 }

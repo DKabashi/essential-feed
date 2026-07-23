@@ -242,6 +242,21 @@ final class FeedViewControllerTests: XCTestCase {
         XCTAssertNil(view?.renderedImage)
     }
     
+    func test_feedImageView_doesNotRenderImageOfPreviousCellThatNeverBecameVisible() {
+        let (sut, loader) = makeSUT()
+                
+        sut.simulateViewAppearance()
+        loader.completeFeedLoading(with: [uniqueFeedImage(url: anyURL()), uniqueFeedImage(url: anyURL())], at: 0)
+        
+        let view0 = try! XCTUnwrap(sut.simulateFeedImageViewVisible(at: 0))
+        view0.prepareForReuse()
+        
+        let imageData0 = UIImage.make(withColor: .red).pngData()!
+        loader.completeImageDataLoadingWithSuccess(with: imageData0, at: 0)
+        
+        XCTAssertEqual(view0.renderedImage, .none, "Expected no image state change for reused view once image loading completes successfully")
+    }
+    
     // MARK: - Helpers
     
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: FeedViewController, loader: FeedLoaderSpy) {
