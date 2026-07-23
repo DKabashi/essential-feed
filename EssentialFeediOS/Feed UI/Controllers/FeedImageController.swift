@@ -34,7 +34,7 @@ final class FeedImageController: FeedImageView {
         cell?.descriptionLabel.text = model.description
         cell?.onRetry = delegate.didRequestImage
         
-        cell?.feedImageView.image = model.image
+        cell?.feedImageView.setImageWithFadeAnimation(model.image)
         cell?.feedImageRetryButton.isHidden = !model.shouldRetry
         
         if model.isLoading {
