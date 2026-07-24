@@ -3,15 +3,7 @@ import UIKit
 public final class FeedViewController: UITableViewController {
     private var isViewIsAppearingCalled = false
     var tableModel = [FeedImageController]() {
-        didSet {
-            if Thread.isMainThread {
-                tableView.reloadData()
-            } else {
-                DispatchQueue.main.async { [weak self] in
-                    self?.tableView.reloadData()
-                }
-            }
-        }
+        didSet { tableView.reloadData() }
     }
 
     public var refreshController: FeedRefreshViewController?
