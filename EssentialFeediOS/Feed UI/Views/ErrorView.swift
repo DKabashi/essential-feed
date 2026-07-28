@@ -2,10 +2,10 @@ import UIKit
 
 public final class ErrorView: UIView {
     public var message: String? {
-        get { return errorLabel.text }
-        set { errorLabel.text = newValue }
+        get { return isVisible ? errorLabel.text : nil }
+        set { setMessageAnimated(newValue) }
     }
-
+    
     private let errorLabel = UILabel()
     
     public override init(frame: CGRect) {
@@ -15,8 +15,7 @@ public final class ErrorView: UIView {
     }
     
     private func setupView() {
-        backgroundColor = .red
-        heightAnchor.constraint(equalToConstant: 100).isActive = true
+        backgroundColor = .clear
     }
     
     private func setupErrorLabel() {
@@ -31,5 +30,38 @@ public final class ErrorView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private var isVisible: Bool {
+        return alpha > 0
+    }
+    
+    private func setMessageAnimated(_ message: String?) {
+        if let message = message {
+            showAnimated(message)
+        } else {
+            hideMessageAnimated()
+        }
+    }
+    
+    private func showAnimated(_ message: String) {
+        errorLabel.text = message
+        
+        UIView.animate(withDuration: 0.25) {
+            self.alpha = 1
+            self.backgroundColor = .red
+        }
+    }
+    
+    private func hideMessageAnimated() {
+        UIView.animate(
+            withDuration: 0.25,
+            animations: {
+                self.alpha = 0
+                self.backgroundColor = .clear
+            },
+            completion: { completed in
+                if completed { self.errorLabel.text = nil }
+            })
     }
 }
