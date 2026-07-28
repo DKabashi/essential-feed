@@ -1,7 +1,10 @@
 import UIKit
 
 public final class ErrorView: UIView {
-    public var message: String?
+    public var message: String? {
+        get { return errorLabel.text }
+        set { errorLabel.text = newValue }
+    }
 
     private let errorLabel = UILabel()
     
@@ -19,7 +22,7 @@ public final class ErrorView: UIView {
     private func setupErrorLabel() {
         addSubview(errorLabel)
         errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        errorLabel.text = message
+        errorLabel.text = nil
         errorLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10).isActive = true
         errorLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10).isActive = true
         errorLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
