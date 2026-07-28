@@ -3,7 +3,7 @@ import EssentialFeediOS
 
 extension FeedImageCell {
     var isLocationVisible: Bool {
-        locationLabel.isHidden == false
+        locationStackView.isHidden == false
     }
     
     var descriptionText: String? {

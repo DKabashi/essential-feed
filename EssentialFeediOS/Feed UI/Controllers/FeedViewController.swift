@@ -53,7 +53,8 @@ public final class FeedViewController: UITableViewController {
     }
     
     public override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        _ = tableModel[indexPath.row].view(in: tableView)
+        // There is a bug in the line below
+        //_ = tableModel[indexPath.row].view(in: tableView)
     }
     
     public override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
