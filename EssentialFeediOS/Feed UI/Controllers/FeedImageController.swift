@@ -29,7 +29,7 @@ final class FeedImageController: FeedImageView {
     }
     
     func display(_ model: FeedImageViewModel<UIImage>) {
-        cell?.locationLabel.isHidden = !model.hasLocation
+        cell?.locationStackView.isHidden = !model.hasLocation
         cell?.locationLabel.text = model.location
         cell?.descriptionLabel.text = model.description
         cell?.onRetry = { [weak self] in

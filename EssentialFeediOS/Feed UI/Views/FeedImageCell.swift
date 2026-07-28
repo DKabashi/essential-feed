@@ -1,14 +1,15 @@
 import UIKit
 
 public class FeedImageCell: UITableViewCell {
-    public let locationLabel = UILabel()
     public let descriptionLabel = UILabel()
     public let imageContainer = UIView()
     public let feedImageView = UIImageView()
+    public let locationStackView = UIStackView()
+    public let locationLabel = UILabel()
 
     private let locationIconImageView = UIImageView()
-    private let locationStackView = UIStackView()
     private let containerStackView = UIStackView()
+    private let locationImageContainerView = UIView()
     
     // TODO: Add retry button in ui
     private(set) public lazy var feedImageRetryButton: UIButton = {
@@ -33,7 +34,7 @@ public class FeedImageCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupContainerStackView()
         setupLocationStackView()
-        setupLocationIconImageView()
+        setupLocationImageView()
         setupLocationLabel()
         setupFeedImageView()
         setupDescriptionLabel()
@@ -66,11 +67,22 @@ public extension FeedImageCell {
         locationStackView.axis = .horizontal
         locationStackView.alignment = .center
         locationStackView.spacing = 6
+        locationStackView.distribution = .fill
     }
     
-    private func setupLocationIconImageView() {
-        locationStackView.addArrangedSubview(locationIconImageView)
-        locationIconImageView.image = UIImage(named: "pin")
+    private func setupLocationImageView() {
+        locationStackView.addArrangedSubview(locationImageContainerView)
+        locationImageContainerView.translatesAutoresizingMaskIntoConstraints = false
+        locationIconImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        locationImageContainerView.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        locationImageContainerView.widthAnchor.constraint(equalToConstant: 30).isActive = true
+
+        locationImageContainerView.addSubview(locationIconImageView)
+        locationIconImageView.centerXAnchor.constraint(equalTo: locationImageContainerView.centerXAnchor).isActive = true
+        locationIconImageView.centerYAnchor.constraint(equalTo: locationImageContainerView.centerYAnchor).isActive = true
+        
+        locationIconImageView.image = UIImage(systemName: "pin.square.fill")
         locationIconImageView.contentMode = .scaleAspectFit
         locationIconImageView.widthAnchor.constraint(equalToConstant: 30).isActive = true
         locationIconImageView.heightAnchor.constraint(equalToConstant: 30).isActive = true
