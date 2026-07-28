@@ -1,5 +1,9 @@
 import UIKit
 
+public final class ErrorView: UIView {
+    public var message: String?
+}
+
 public final class FeedViewController: UITableViewController {
     private var isViewIsAppearingCalled = false
     var tableModel = [FeedImageController]() {
@@ -7,7 +11,8 @@ public final class FeedViewController: UITableViewController {
     }
 
     public var refreshController: FeedRefreshViewController?
-    
+    public let errorView = ErrorView()
+
     public convenience init(refreshController: FeedRefreshViewController) {
         self.init()
         self.refreshController = refreshController
