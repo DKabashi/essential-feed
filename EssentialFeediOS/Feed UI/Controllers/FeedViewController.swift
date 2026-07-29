@@ -1,4 +1,5 @@
 import UIKit
+import EssentialFeed
 
 public final class FeedViewController: UITableViewController {
     private var isViewIsAppearingCalled = false
@@ -77,7 +78,7 @@ extension FeedViewController {
 }
 
 extension FeedViewController: FeedErrorView {
-    func display(_ viewModel: FeedErrorViewModel) {
+    public func display(_ viewModel: FeedErrorViewModel) {
         errorView.message = viewModel.message
     }
 }

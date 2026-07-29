@@ -141,9 +141,17 @@
 			);
 			target = 816BEE593018AC3F00BC45BA /* EssentialFeedApp */;
 		};
+		816BEE9D301A304300BC45BA /* Exceptions for "EssentialFeedTests" folder in "EssentialFeedTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Feed Presentation/FeedLocatizationTests.swift",
+			);
+			target = 81B9E73D2F3B7742000F5E57 /* EssentialFeedTests */;
+		};
 		81B8D9B22FFBB07F005BB119 /* Exceptions for "EssentialFeedTests" folder in "EssentialFeediOSTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Feed Presentation/FeedLocatizationTests.swift",
 				Helpers/SharedTestHelpers.swift,
 				"Helpers/XCTestCase+MemoryLeak.swift",
 			);
@@ -197,6 +205,7 @@
 		81B9E7422F3B7742000F5E57 /* EssentialFeedTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				816BEE9D301A304300BC45BA /* Exceptions for "EssentialFeedTests" folder in "EssentialFeedTests" target */,
 				811A6E032FD8575300FEB69B /* Exceptions for "EssentialFeedTests" folder in "EssentialFeedAPIEndToEndTests" target */,
 				81F8EF892FED76EB00A302E3 /* Exceptions for "EssentialFeedTests" folder in "EssentialFeedCacheIntegrationTests" target */,
 				81B8D9B22FFBB07F005BB119 /* Exceptions for "EssentialFeedTests" folder in "EssentialFeediOSTests" target */,
