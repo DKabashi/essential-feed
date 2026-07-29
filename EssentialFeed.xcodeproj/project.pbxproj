@@ -141,6 +141,13 @@
 			);
 			target = 816BEE593018AC3F00BC45BA /* EssentialFeedApp */;
 		};
+		816BEE8B301A2AD300BC45BA /* Exceptions for "EssentialFeed" folder in "EssentialFeedTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Feed Presentation/Feed.xcstrings",
+			);
+			target = 81B9E73D2F3B7742000F5E57 /* EssentialFeedTests */;
+		};
 		81B8D9B22FFBB07F005BB119 /* Exceptions for "EssentialFeedTests" folder in "EssentialFeediOSTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -191,6 +198,9 @@
 		};
 		81B9E7352F3B7742000F5E57 /* EssentialFeed */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				816BEE8B301A2AD300BC45BA /* Exceptions for "EssentialFeed" folder in "EssentialFeedTests" target */,
+			);
 			path = EssentialFeed;
 			sourceTree = "<group>";
 		};
