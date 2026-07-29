@@ -16,6 +16,7 @@ public final class ErrorView: UIView {
     
     private func setupView() {
         backgroundColor = .clear
+        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(hideMessageAnimated)))
     }
     
     private func setupErrorLabel() {
@@ -53,7 +54,7 @@ public final class ErrorView: UIView {
         }
     }
     
-    private func hideMessageAnimated() {
+    @objc private func hideMessageAnimated() {
         UIView.animate(
             withDuration: 0.25,
             animations: {
