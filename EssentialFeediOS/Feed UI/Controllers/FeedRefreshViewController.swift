@@ -17,16 +17,20 @@ public final class FeedRefreshViewController: NSObject, FeedLoadingView {
     }
     
     func display(_ viewModel: FeedLoadingViewModel) {
-        if viewModel.isLoading {
-            view.beginRefreshing()
-        } else {
-            view.endRefreshing()
-        }
+        update(isRefreshing: viewModel.isLoading)
     }
     
     func loadView() -> UIRefreshControl {
         let view = UIRefreshControl()
         view.addTarget(self, action: #selector(refresh), for: .valueChanged)
         return view
+    }
+    
+    private func update(isRefreshing: Bool) {
+        if isRefreshing {
+            view.beginRefreshing()
+        } else {
+            view.endRefreshing()
+        }
     }
 }
