@@ -82,3 +82,13 @@ extension FeedViewController: FeedErrorView {
     }
 }
 
+extension FeedViewController {
+    public override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        errorView.frame = .init(x: 0, y: 0, width: tableView.frame.width, height: 40)
+        return errorView
+    }
+    
+    public override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 40
+    }
+}
