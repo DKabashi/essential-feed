@@ -3,7 +3,7 @@ import EssentialFeed
 
 final class FeedImagePresenterTests: XCTestCase {
     
-    func test_init_displaysNoMessage() {
+    func test_init_doesNotSendMessagesToView() {
         let (_, view) = makeSUT()
         
         XCTAssertEqual(view.messages, [])
