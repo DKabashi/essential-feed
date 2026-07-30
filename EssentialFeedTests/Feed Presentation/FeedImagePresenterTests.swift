@@ -1,22 +1,22 @@
 import XCTest
 
-struct FeedImageViewModel {
+struct FeedLoadingImageViewModel {
     let isLoading: Bool
 }
 
-protocol FeedImageView {
-    func display(_ model: FeedImageViewModel)
+protocol FeedLoadingImageView {
+    func display(_ model: FeedLoadingImageViewModel)
 }
 
 final class FeedImagePresenter {
-    private let view: FeedImageView
+    private let view: FeedLoadingImageView
     
-    init(view: FeedImageView) {
+    init(view: FeedLoadingImageView) {
         self.view = view
     }
     
     func didStartLoadingImage() {
-        view.display(FeedImageViewModel(isLoading: true))
+        view.display(FeedLoadingImageViewModel(isLoading: true))
     }
 }
 
@@ -37,14 +37,14 @@ final class FeedImagePresenterTests: XCTestCase {
         XCTAssertEqual(view.messages, [.display(isLoading: true)])
     }
     
-    final class ViewSpy: FeedImageView {
+    final class ViewSpy: FeedLoadingImageView {
         enum Message: Equatable {
             case display(isLoading: Bool)
         }
         
         private(set) var messages = [Message]()
         
-        func display(_ model: FeedImageViewModel) {
+        func display(_ model: FeedLoadingImageViewModel) {
             messages.append(.display(isLoading: model.isLoading))
         }
     }
