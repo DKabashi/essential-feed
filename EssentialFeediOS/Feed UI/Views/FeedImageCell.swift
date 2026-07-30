@@ -36,7 +36,7 @@ public class FeedImageCell: UITableViewCell {
         setupLocationStackView()
         setupLocationImageView()
         setupLocationLabel()
-        setupFeedImageView()
+        setupImageContainer()
         setupDescriptionLabel()
     }
     
@@ -92,13 +92,25 @@ public extension FeedImageCell {
         locationStackView.addArrangedSubview(locationLabel)
     }
     
+    private func setupImageContainer() {
+        containerStackView.addArrangedSubview(imageContainer)
+        imageContainer.translatesAutoresizingMaskIntoConstraints = false
+        imageContainer.widthAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
+        imageContainer.heightAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
+        
+        setupFeedImageView()
+    }
+    
     private func setupFeedImageView() {
-        containerStackView.addArrangedSubview(feedImageView)
+        imageContainer.addSubview(feedImageView)
+        feedImageView.translatesAutoresizingMaskIntoConstraints = false
         feedImageView.contentMode = .scaleAspectFill
         feedImageView.layer.cornerRadius = 22
         feedImageView.clipsToBounds = true
-        feedImageView.widthAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
-        feedImageView.heightAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
+        feedImageView.topAnchor.constraint(equalTo: imageContainer.topAnchor).isActive = true
+        feedImageView.bottomAnchor.constraint(equalTo: imageContainer.bottomAnchor).isActive = true
+        feedImageView.leadingAnchor.constraint(equalTo: imageContainer.leadingAnchor).isActive = true
+        feedImageView.trailingAnchor.constraint(equalTo: imageContainer.trailingAnchor).isActive = true
     }
     
     private func setupDescriptionLabel() {
