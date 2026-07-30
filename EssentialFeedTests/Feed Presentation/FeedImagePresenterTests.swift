@@ -1,16 +1,6 @@
 import XCTest
 import EssentialFeed
 
-
-// TODO: Refactor to use the laodingview
-struct FeedLoadingImageViewModel {
-    let isLoading: Bool
-}
-
-protocol FeedLoadingImageView {
-    func display(_ model: FeedLoadingImageViewModel)
-}
-
 struct RetryViewModel {
     let shouldRetry: Bool
 }
@@ -37,11 +27,11 @@ protocol FeedImageView {
 
 final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == Image {
     private let imageView: View
-    private let loadingView: FeedLoadingImageView
+    private let loadingView: LoadingView
     private let retryView: RetryView
     private let imageTransformer: (Data) -> Image?
     
-    init(imageView: View, loadingView: FeedLoadingImageView, retryView: RetryView, imageTransformer: @escaping (Data) -> Image?) {
+    init(imageView: View, loadingView: LoadingView, retryView: RetryView, imageTransformer: @escaping (Data) -> Image?) {
         self.imageView = imageView
         self.loadingView = loadingView
         self.retryView = retryView
@@ -51,7 +41,7 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
     func didStartLoadingImage(model: FeedImage) {
         imageView.display(FeedImageViewModel(image: nil, location: model.location, description: model.description))
         retryView.display(RetryViewModel(shouldRetry: false))
-        loadingView.display(FeedLoadingImageViewModel(isLoading: true))
+        loadingView.display(LoadingViewModel(isLoading: true))
     }
     
     private struct ImageDataTransformationError: Error {}
@@ -61,7 +51,7 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
             didFinishLoadingImageWithError(ImageDataTransformationError())
             return
         }
-        loadingView.display(FeedLoadingImageViewModel(isLoading: false))
+        loadingView.display(LoadingViewModel(isLoading: false))
         retryView.display(RetryViewModel(shouldRetry: false))
         imageView.display(
             FeedImageViewModel(
@@ -74,7 +64,7 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
     
     
     func didFinishLoadingImageWithError(_ error: Error) {
-        loadingView.display(FeedLoadingImageViewModel(isLoading: false))
+        loadingView.display(LoadingViewModel(isLoading: false))
         retryView.display(RetryViewModel(shouldRetry: true))
     }
 }
@@ -152,7 +142,7 @@ final class FeedImagePresenterTests: XCTestCase {
         return (sut, view)
     }
     
-    final class ViewSpy: FeedLoadingImageView, FeedImageView, RetryView {
+    final class ViewSpy: LoadingView, FeedImageView, RetryView {
         enum Message: Equatable {
             case display(isLoading: Bool)
             case display(shouldRetry: Bool)
@@ -165,7 +155,7 @@ final class FeedImagePresenterTests: XCTestCase {
         
         private(set) var messages = [Message]()
         
-        func display(_ model: FeedLoadingImageViewModel) {
+        func display(_ model: LoadingViewModel) {
             messages.append(.display(isLoading: model.isLoading))
         }
         

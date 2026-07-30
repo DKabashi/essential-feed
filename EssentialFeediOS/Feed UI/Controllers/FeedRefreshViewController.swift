@@ -5,7 +5,7 @@ protocol FeedRefreshViewControllerDelegate {
     func didRequestFeedRefresh()
 }
 
-public final class FeedRefreshViewController: NSObject, FeedLoadingView {
+public final class FeedRefreshViewController: NSObject, LoadingView {
     public lazy var view: UIRefreshControl = loadView()
     private let delegate: FeedRefreshViewControllerDelegate
     
@@ -17,7 +17,7 @@ public final class FeedRefreshViewController: NSObject, FeedLoadingView {
         delegate.didRequestFeedRefresh()
     }
     
-    public func display(_ viewModel: FeedLoadingViewModel) {
+    public func display(_ viewModel: LoadingViewModel) {
         update(isRefreshing: viewModel.isLoading)
     }
     
