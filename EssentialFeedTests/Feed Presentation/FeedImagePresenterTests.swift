@@ -8,15 +8,34 @@ protocol FeedLoadingImageView {
     func display(_ model: FeedLoadingImageViewModel)
 }
 
-final class FeedImagePresenter {
-    private let view: FeedLoadingImageView
+struct FeedImageViewModel<Image> {
+    let image: Image?
+    let location: String?
+    let description: String?
     
-    init(view: FeedLoadingImageView) {
-        self.view = view
+    var hasLocation: Bool {
+        return location != nil
+    }
+}
+
+protocol FeedImageView {
+    associatedtype Image
+
+    func display(_ model: FeedImageViewModel<Image>)
+}
+
+final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == Image {
+    private let imageView: View
+    private let loadingView: FeedLoadingImageView
+    
+    init(imageView: View, loadingView: FeedLoadingImageView) {
+        self.imageView = imageView
+        self.loadingView = loadingView
     }
     
-    func didStartLoadingImage() {
-        view.display(FeedLoadingImageViewModel(isLoading: true))
+    func didStartLoadingImage(_ model: FeedImageViewModel<Image>) {
+        imageView.display(FeedImageViewModel(image: nil, location: model.location, description: model.description))
+        loadingView.display(FeedLoadingImageViewModel(isLoading: true))
     }
 }
 
@@ -28,24 +47,34 @@ final class FeedImagePresenterTests: XCTestCase {
         XCTAssertEqual(view.messages, [])
     }
     
-    func test_didStartLoadingImage_displaysLoader() {
+    func test_didStartLoadingImage_displaysInitialFeedImageDataAndLoader() {
         let (sut, view) = makeSUT()
         
-        sut.didStartLoadingImage()
-        XCTAssertEqual(view.messages, [.display(isLoading: true)])
+        let model = FeedImageViewModel<ImageSpy>(image: nil, location: "Loc", description: "Desc")
+        sut.didStartLoadingImage(model)
+        
+        XCTAssertEqual(view.messages, [
+            .display(image: model.image, location: model.location, description: model.description),
+            .display(isLoading: true)
+        ])
     }
     
-    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedImagePresenter, view: ViewSpy) {
+    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedImagePresenter<ViewSpy, ImageSpy>, view: ViewSpy) {
         let view = ViewSpy()
-        let sut = FeedImagePresenter(view: view)
+        let sut = FeedImagePresenter(imageView: view, loadingView: view)
         checkForMemoryLeaks(for: view, file: file, line: line)
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut, view)
     }
     
-    final class ViewSpy: FeedLoadingImageView {
+    final class ViewSpy: FeedLoadingImageView, FeedImageView {
         enum Message: Equatable {
             case display(isLoading: Bool)
+            case display(
+                image: ImageSpy?,
+                location: String?,
+                description: String?
+            )
         }
         
         private(set) var messages = [Message]()
@@ -53,5 +82,11 @@ final class FeedImagePresenterTests: XCTestCase {
         func display(_ model: FeedLoadingImageViewModel) {
             messages.append(.display(isLoading: model.isLoading))
         }
+        
+        func display(_ model: FeedImageViewModel<ImageSpy>) {
+            messages.append(.display(image: model.image, location: model.location, description: model.description))
+        }
     }
+    
+    enum ImageSpy: Equatable {}
 }
