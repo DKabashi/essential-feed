@@ -1,4 +1,5 @@
 import XCTest
+import EssentialFeed
 
 
 // TODO: Refactor to use the laodingview
@@ -38,18 +39,30 @@ final class FeedImagePresenter<View: FeedImageView, Image> where View.Image == I
     private let imageView: View
     private let loadingView: FeedLoadingImageView
     private let retryView: RetryView
+    private let imageTransformer: (Data) -> Image?
     
-    init(imageView: View, loadingView: FeedLoadingImageView, retryView: RetryView) {
+    init(imageView: View, loadingView: FeedLoadingImageView, retryView: RetryView, imageTransformer: @escaping (Data) -> Image?) {
         self.imageView = imageView
         self.loadingView = loadingView
         self.retryView = retryView
+        self.imageTransformer = imageTransformer
     }
     
-    func didStartLoadingImage(_ model: FeedImageViewModel<Image>) {
+    func didStartLoadingImage(model: FeedImage) {
         imageView.display(FeedImageViewModel(image: nil, location: model.location, description: model.description))
         retryView.display(RetryViewModel(shouldRetry: false))
         loadingView.display(FeedLoadingImageViewModel(isLoading: true))
     }
+    
+    private struct ImageDataTransformationError: Error {}
+
+    func didFinishLoadingImage(with data: Data, model: FeedImage) {
+        guard let image = imageTransformer(data) else {
+            didFinishLoadingImageWithError(ImageDataTransformationError())
+            return
+        }
+    }
+    
     
     func didFinishLoadingImageWithError(_ error: Error) {
         loadingView.display(FeedLoadingImageViewModel(isLoading: false))
@@ -67,12 +80,12 @@ final class FeedImagePresenterTests: XCTestCase {
     
     func test_didStartLoadingImage_displaysInitialFeedImageDataAndHidesRetryButtonAndShowsLoader() {
         let (sut, view) = makeSUT()
+        let model = uniqueFeedItem()
         
-        let model = FeedImageViewModel<ImageSpy>(image: nil, location: "Loc", description: "Desc")
-        sut.didStartLoadingImage(model)
+        sut.didStartLoadingImage(model: model)
         
         XCTAssertEqual(view.messages, [
-            .display(image: model.image, location: model.location, description: model.description),
+            .display(image: nil, location: model.location, description: model.description),
             .display(shouldRetry: false),
             .display(isLoading: true)
         ])
@@ -89,9 +102,28 @@ final class FeedImagePresenterTests: XCTestCase {
         ])
     }
     
+    func test_didFinishLoadingImage_hidesLoaderAndShowsRetryButtonOnInvalidData() {
+        let (sut, view) = makeSUT()
+        let invalidData = Data("".utf8)
+        let model = uniqueFeedItem()
+        
+        sut.didFinishLoadingImage(with: invalidData, model: model)
+        
+        XCTAssertEqual(view.messages, [
+            .display(isLoading: false),
+            .display(shouldRetry: true)
+        ])
+    }
+    
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedImagePresenter<ViewSpy, ImageSpy>, view: ViewSpy) {
         let view = ViewSpy()
-        let sut = FeedImagePresenter(imageView: view, loadingView: view, retryView: view)
+        let sut = FeedImagePresenter(imageView: view, loadingView: view, retryView: view, imageTransformer: { data in
+            if data.isEmpty {
+                return nil
+            } else {
+                return ImageSpy.someValue
+            }
+        })
         checkForMemoryLeaks(for: view, file: file, line: line)
         checkForMemoryLeaks(for: sut, file: file, line: line)
         return (sut, view)
@@ -123,5 +155,7 @@ final class FeedImagePresenterTests: XCTestCase {
         }
     }
     
-    enum ImageSpy: Equatable {}
+    enum ImageSpy: Equatable {
+        case someValue
+    }
 }

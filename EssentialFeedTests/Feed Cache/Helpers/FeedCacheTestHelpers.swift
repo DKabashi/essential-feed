@@ -2,7 +2,7 @@ import Foundation
 import EssentialFeed
 
 func uniqueFeedItem() -> FeedImage {
-    return FeedImage(id: UUID(), url: anyURL())
+    return FeedImage(id: UUID(), description: "Desc", location: "Loc", url: anyURL())
 }
 
 func uniqueLocalFeedItem() -> LocalFeedImage {
