@@ -27,3 +27,8 @@ extension WeakRefVirtualProxy: FeedErrorView where T: FeedErrorView {
     }
 }
 
+extension WeakRefVirtualProxy: RetryView where T: RetryView {
+    func display(_ model: RetryViewModel) {
+        object?.display(model)
+    }
+}

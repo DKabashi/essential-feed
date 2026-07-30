@@ -1,11 +1,12 @@
 import UIKit
+import EssentialFeed
 
 protocol FeedImageControllerDelegate {
     func didRequestImage()
     func didCancelImageRequest()
 }
 
-final class FeedImageController: FeedImageView {
+final class FeedImageController: FeedImageView, LoadingView, RetryView {
     private let delegate: FeedImageControllerDelegate
     private var cell: FeedImageCell?
 
@@ -35,19 +36,24 @@ final class FeedImageController: FeedImageView {
         cell?.onRetry = { [weak self] in
             self?.delegate.didRequestImage()
         }
-        
+
         cell?.onReuse = { [weak self] in
             self?.releaseCellForReuse()
         }
-        
+
         cell?.feedImageView.setImageWithFadeAnimation(model.image)
-        cell?.feedImageRetryButton.isHidden = !model.shouldRetry
-        
-        if model.isLoading {
+    }
+    
+    func display(_ viewModel: LoadingViewModel) {
+        if viewModel.isLoading {
             cell?.imageContainer.startShimmering()
         } else {
             cell?.imageContainer.stopShimmering()
         }
+    }
+    
+    func display(_ model: RetryViewModel) {
+        cell?.feedImageRetryButton.isHidden = !model.shouldRetry
     }
     
     private func releaseCellForReuse() {

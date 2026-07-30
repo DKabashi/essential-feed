@@ -23,7 +23,7 @@ final class FeedImageDataLoaderPresentationAdapter<View: FeedImageView, Image>: 
                 let image = try result.get()
                 presenter?.didFinishLoadingImage(with: image, model: feedImage)
             } catch {
-                presenter?.didFinishLoadingImageWithError(error, model: feedImage)
+                presenter?.didFinishLoadingImageWithError(error)
             }
         }
     }
