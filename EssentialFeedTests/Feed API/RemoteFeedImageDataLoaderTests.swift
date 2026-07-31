@@ -3,17 +3,25 @@ import EssentialFeed
 
 final class RemoteFeedImageDataLoader {
     private let client: HTTPClient
-
+    
     init(client: HTTPClient) {
         self.client = client
+    }
+    
+    public enum Error: Swift.Error {
+        case invalidData
     }
     
     func loadImageData(from url: URL, completion: @escaping (FeedImageDataLoader.Result) -> Void) {
         client.get(from: url) { result in
             switch result {
+            case let .success((_, urlResponse)):
+                guard urlResponse.statusCode == 200 else {
+                    completion(.failure(Error.invalidData))
+                    return
+                }
             case let .failure(error):
                 completion(.failure(error))
-            default: break
             }
         }
     }
@@ -54,6 +62,26 @@ final class RemoteFeedImageDataLoaderTests: XCTestCase {
         }
     }
     
+    func test_loadImageDataFromURL_deliversErrorOnNon200Response() {
+        let (sut, client) = makeSUT()
+        
+        let samples = [199, 201, 300, 400, 500]
+        
+        samples.enumerated().forEach { index, code in
+            expect(sut, toCompleteWith: failure(.invalidData), when: {
+                client.completeRequest(withStatusCode: code, data: anyData(), at: index)
+            })
+        }
+    }
+    
+    private func anyData() -> Data {
+        return Data("any data".utf8)
+    }
+    
+    private func failure(_ error: RemoteFeedImageDataLoader.Error) -> FeedImageDataLoader.Result {
+        return .failure(error)
+    }
+    
     private func makeSUT(url: URL = anyURL(), file: StaticString = #file, line: UInt = #line) -> (sut: RemoteFeedImageDataLoader, client: HTTPClientSpy) {
         let client = HTTPClientSpy()
         let sut = RemoteFeedImageDataLoader(client: client)
@@ -85,7 +113,7 @@ final class RemoteFeedImageDataLoaderTests: XCTestCase {
         
         wait(for: [exp], timeout: 1.0)
     }
-
+    
     final class HTTPClientSpy: HTTPClient {
         /// Received requests
         private(set) var messages = [(url: URL, completion: (HTTPClient.Result) -> Void)]()
@@ -100,6 +128,16 @@ final class RemoteFeedImageDataLoaderTests: XCTestCase {
         
         func completeRequest(with error: Error, at index: Int = 0) {
             messages[index].completion(.failure(error))
+        }
+        
+        func completeRequest(withStatusCode code: Int, data: Data, at index: Int = 0) {
+            let response = HTTPURLResponse(
+                url: requestedURLs[index],
+                statusCode: code,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            messages[index].completion(.success((data, response)))
         }
     }
 }
