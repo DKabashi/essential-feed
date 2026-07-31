@@ -149,20 +149,6 @@
 			);
 			target = 812DAECB2FF51CD6001C885F /* EssentialFeediOSTests */;
 		};
-		81F1715F301B9E890084EC14 /* Exceptions for "EssentialFeed" folder in "EssentialFeed" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Feed Feature/FeedImageDataLoader.swift",
-			);
-			target = 81B9E7322F3B7742000F5E57 /* EssentialFeed */;
-		};
-		81F17160301B9E890084EC14 /* Exceptions for "EssentialFeed" folder in "EssentialFeediOS" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Feed Feature/FeedImageDataLoader.swift",
-			);
-			target = 812DAEC32FF51CD6001C885F /* EssentialFeediOS */;
-		};
 		81F8EF892FED76EB00A302E3 /* Exceptions for "EssentialFeedTests" folder in "EssentialFeedCacheIntegrationTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -205,10 +191,6 @@
 		};
 		81B9E7352F3B7742000F5E57 /* EssentialFeed */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				81F1715F301B9E890084EC14 /* Exceptions for "EssentialFeed" folder in "EssentialFeed" target */,
-				81F17160301B9E890084EC14 /* Exceptions for "EssentialFeed" folder in "EssentialFeediOS" target */,
-			);
 			path = EssentialFeed;
 			sourceTree = "<group>";
 		};
