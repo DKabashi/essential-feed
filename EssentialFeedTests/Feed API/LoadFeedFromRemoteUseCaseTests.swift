@@ -148,14 +148,19 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         action()
         wait(for: [expectation], timeout: 1)
     }
-    
+
     private class NetworkClientSpy: HTTPClient {
         private(set) var urls: [URL] = []
         private(set) var completions: [(HTTPClient.Result) -> Void] = []
         
-        func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
+        private class TaskSpy: HTTPClientTask {
+            func cancel() {}
+        }
+
+        func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
             self.urls.append(url)
             completions.append(completion)
+            return TaskSpy()
         }
         
         func complete(with statusCode: Int, at index: Int = 0, data: Data = Data()) {
