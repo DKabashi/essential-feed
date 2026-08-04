@@ -6,7 +6,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     func test_init_urlIsNotNil() {
         let (_, client) = prepareSUT()
         
-        XCTAssertTrue(client.urls.isEmpty)
+        XCTAssertTrue(client.requestedURLs.isEmpty)
     }
     
     func test_loadFeed_assignsUrlToClient() {
@@ -14,7 +14,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         
         sut.loadFeed { _ in }
         
-        XCTAssertFalse(client.urls.isEmpty)
+        XCTAssertFalse(client.requestedURLs.isEmpty)
     }
     
     func test_loadFeed_calledTwiceAssignsSameNumberOfUrlsToClient() {
@@ -23,7 +23,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         sut.loadFeed { _ in }
         sut.loadFeed { _ in }
         
-        XCTAssertEqual(client.urls.count, 2)
+        XCTAssertEqual(client.requestedURLs.count, 2)
     }
     
     func test_loadFeed_returnsErrorOnClientError() {
@@ -31,7 +31,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         
         let expectedResult: RemoteFeedLoader.Result = .failure(APIError.connectivity)
         expect(sut, toCompleteWithResult: expectedResult, when: {
-            client.completeWithConnectivityError()
+            client.complete(with: APIError.connectivity)
         })
     }
     
@@ -44,7 +44,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         statusCodesToTest.enumerated().forEach { index, statusCode in
             let expectedResult: RemoteFeedLoader.Result = .failure(APIError.invalidData)
             expect(sut, toCompleteWithResult: expectedResult, when: {
-                client.complete(with: statusCode, at: index)
+                client.complete(withStatusCode: statusCode, data: anyData(), at: index)
             })
         }
     }
@@ -54,7 +54,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         
         let expectedResult: RemoteFeedLoader.Result = .failure(APIError.invalidData)
         expect(sut, toCompleteWithResult: expectedResult, when: {
-            client.complete(with: 200)
+            client.complete(withStatusCode: 200, data: anyData())
         })
     }
     
@@ -64,7 +64,7 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let expectedResult: RemoteFeedLoader.Result = .success([])
         expect(sut, toCompleteWithResult: expectedResult, when: {
             let emptyListData: Data = Data("{\"items\": []}".utf8)
-            client.complete(with: 200, data: emptyListData)
+            client.complete(withStatusCode: 200, data: emptyListData)
         })
     }
     
@@ -77,13 +77,13 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         let items = [feedItem1, feedItem2, feedItem3]
         let modelItems = items.map { FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.image) }
         expect(sut, toCompleteWithResult: .success(modelItems), when: {
-            client.complete(with: 200, data: makeItemsJSON(items))
+            client.complete(withStatusCode: 200, data: makeItemsJSON(items))
         })
     }
     
     func test_loadFeed_doesNotDeliverResultWhenInstanceIsDeallocated() {
         let url = URL(string: "https://google.com")!
-        let client = NetworkClientSpy()
+        let client = HTTPClientSpy()
         var sut: RemoteFeedLoader? = RemoteFeedLoader(url: url, client: client)
         
         var capturedResult: [RemoteFeedLoader.Result] = []
@@ -92,13 +92,13 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         }
         
         sut = nil
-        client.complete(with: 200)
+        client.complete(withStatusCode: 200, data: anyData())
         
         XCTAssertTrue(capturedResult.isEmpty)
     }
     
-    private func prepareSUT(url: URL = URL(string: "https://google.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: RemoteFeedLoader, client: NetworkClientSpy) {
-        let client = NetworkClientSpy()
+    private func prepareSUT(url: URL = URL(string: "https://google.com")!, file: StaticString = #filePath, line: UInt = #line) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
+        let client = HTTPClientSpy()
         let sut = RemoteFeedLoader(url: url, client: client)
         checkForMemoryLeaks(for: sut, file: file, line: line)
         checkForMemoryLeaks(for: client, file: file, line: line)
@@ -148,29 +148,4 @@ final class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         action()
         wait(for: [expectation], timeout: 1)
     }
-
-    private class NetworkClientSpy: HTTPClient {
-        private(set) var urls: [URL] = []
-        private(set) var completions: [(HTTPClient.Result) -> Void] = []
-        
-        private class TaskSpy: HTTPClientTask {
-            func cancel() {}
-        }
-
-        func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) -> HTTPClientTask {
-            self.urls.append(url)
-            completions.append(completion)
-            return TaskSpy()
-        }
-        
-        func complete(with statusCode: Int, at index: Int = 0, data: Data = Data()) {
-            let urlResponse = HTTPURLResponse(url: urls.first!, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
-            completions[index](.success((data, urlResponse)))
-        }
-        
-        func completeWithConnectivityError() {
-            completions.first!(.failure(APIError.connectivity))
-        }
-    }
-
 }
