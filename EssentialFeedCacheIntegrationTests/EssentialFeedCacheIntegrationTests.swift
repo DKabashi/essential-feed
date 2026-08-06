@@ -13,13 +13,15 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         undoStoreSideEffects()
     }
     
-    func test_load_deliversEmptyOnEmptyCache() {
+    // MARK: - LocalFeedLoader Tests
+    
+    func test_loadFeed_deliversEmptyOnEmptyCache() {
         let sut = makeFeedLoader()
         
         expect(sut, toLoad: [])
     }
     
-    func test_load_deliversInsertedItemsOnNonEmptyCache() {
+    func test_loadFeed_deliversInsertedItemsOnNonEmptyCache() {
         let sutToInsert = makeFeedLoader()
         let sutToLoad = makeFeedLoader()
         let items = [uniqueFeedItem()]
@@ -29,7 +31,7 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         expect(sutToLoad, toLoad: items)
     }
     
-    func test_save_overridesItemsSavedOnASeparateInstance() {
+    func test_saveFeed_overridesItemsSavedOnASeparateInstance() {
         let sutToInsertFirstItems = makeFeedLoader()
         let sutToInsertLatestItems = makeFeedLoader()
         let sutToLoadLatestItems = makeFeedLoader()
@@ -41,6 +43,8 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         
         expect(sutToLoadLatestItems, toLoad: latestItems)
     }
+    
+    // MARK: - LocalFeedImageDataLoader Tests
     
     func test_loadImageData_deliversSavedDataOnASeparateInstance() {
         let imageLoaderToPerformSave = makeImageLoader()
