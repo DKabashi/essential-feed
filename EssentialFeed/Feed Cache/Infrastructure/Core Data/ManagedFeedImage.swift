@@ -7,6 +7,7 @@ internal class ManagedFeedImage: NSManagedObject {
     @NSManaged internal var location: String?
     @NSManaged internal var url: URL
     @NSManaged internal var cache: ManagedCache
+    @NSManaged internal var data: Data?
 }
 
 extension ManagedFeedImage {
