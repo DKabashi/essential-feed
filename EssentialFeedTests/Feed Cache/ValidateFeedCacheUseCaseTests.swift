@@ -90,6 +90,14 @@ final class ValidateFeedCacheUseCaseTests: XCTestCase {
         })
     }
     
+    func test_validateCache_succeedsOnEmptyCache() {
+        let (sut, store) = makeSut()
+        
+        expect(sut, toCompleteWith: .success(()), when: {
+            store.completeRetrivalWithEmptyCache()
+        })
+    }
+    
     // MARK: Helpers
     
     private func makeSut(timestamp: Date = .now, file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
