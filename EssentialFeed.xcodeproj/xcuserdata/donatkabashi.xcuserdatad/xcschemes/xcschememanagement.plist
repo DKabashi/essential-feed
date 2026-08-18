@@ -24,11 +24,6 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>EssentialFeedApp.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>5</integer>
-		</dict>
 		<key>EssentialFeedCacheIntegrationTests.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -58,6 +53,11 @@
 			<true/>
 		</dict>
 		<key>812DAECB2FF51CD6001C885F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>816BEE593018AC3F00BC45BA</key>
 		<dict>
 			<key>primary</key>
 			<true/>
