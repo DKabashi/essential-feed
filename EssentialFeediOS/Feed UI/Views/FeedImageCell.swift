@@ -63,7 +63,9 @@ public extension FeedImageCell {
     
     private func setupLocationStackView() {
         containerStackView.addArrangedSubview(locationStackView)
-        locationStackView.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        let locationHeightConstraint = locationStackView.heightAnchor.constraint(equalToConstant: 50)
+        locationHeightConstraint.priority = .required - 1
+        locationHeightConstraint.isActive = true
         locationStackView.axis = .horizontal
         locationStackView.alignment = .center
         locationStackView.spacing = 6
@@ -96,7 +98,9 @@ public extension FeedImageCell {
         containerStackView.addArrangedSubview(imageContainer)
         imageContainer.translatesAutoresizingMaskIntoConstraints = false
         imageContainer.widthAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
-        imageContainer.heightAnchor.constraint(equalTo: containerStackView.widthAnchor).isActive = true
+        let imageAspectRatioConstraint = imageContainer.heightAnchor.constraint(equalTo: containerStackView.widthAnchor)
+        imageAspectRatioConstraint.priority = .required - 1
+        imageAspectRatioConstraint.isActive = true
         
         setupFeedImageView()
     }
